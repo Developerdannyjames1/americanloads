@@ -1,0 +1,54 @@
+﻿
+@{
+    ViewBag.Title = "ReImportEmail";
+
+    var emails = (ViewBag.Emails as List<ASTDAT.Data.UploadLogModel>);
+}
+
+<h2>ReImportEmail</h2>
+
+<h2>@ViewBag.Message</h2>
+<h2>@ViewBag.LoadId</h2>
+
+@if (emails != null)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <tr>
+                    <th>LoadNo</th>
+                    <th>Id</th>
+                    <th>Begin</th>
+                    <th>Company</th>
+                    <th>Converted</th>
+                    <th>ConvertError</th>
+                    <th>FileName</th>
+                    <th>Finished</th>
+                    <th>MessageID</th>
+                    <th>SendAttempts</th>
+                    <th>Uploaded</th>
+                    <th>UploadError</th>
+                </tr>
+                @foreach(var item in emails)
+                {
+                    <tr>
+                        <td>@item.LoadNo</td>
+                        <td>
+                            <a href="@Url.Action("", new { loadNo = ViewBag.LoadNo, id = item.Id  })">@item.Id</a>
+                        </td>
+                        <td>@item.Begin</td>
+                        <td>@item.Company</td>
+                        <td>@item.Converted</td>
+                        <td>@item.ConvertError</td>
+                        <td>@item.FileName</td>
+                        <td>@item.Finished</td>
+                        <td>@item.MessageID</td>
+                        <td>@item.SendAttempts</td>
+                        <td>@item.Uploaded</td>
+                        <td>@item.UploadError</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+}

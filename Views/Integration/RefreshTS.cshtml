@@ -1,0 +1,38 @@
+﻿@using TruckStopService.TruckStopServiceReference
+
+@model  List<LoadPostingReturn>
+
+@{
+    ViewBag.Title = "RefreshTS";
+}
+
+<h2>RefreshTS</h2>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <tr>
+                <th>Load Number</th>
+                <th>Load ID</th>
+                <th>Errors</th>
+            </tr>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.LoadNumbers[0]</td>
+                    <td>@item.Loads[0]</td>
+                    <td>
+                        @if (item.Errors != null)
+                        {
+                            foreach(var error in item.Errors)
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

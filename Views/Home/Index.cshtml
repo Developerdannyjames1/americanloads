@@ -1,0 +1,898 @@
+﻿
+@{
+    ViewBag.Title = "Current Loads";
+}
+
+<style>
+    .ui-select-search {
+        height: 22px !important;
+        padding: 2px !important;
+    }
+    .ui-select-container {
+        border-color: #ccc !important;
+    }
+    input.ui-select-search{
+        text-transform: uppercase;
+    }
+    .headeruis .ui-select-search {
+        margin: 0px !important;
+    }
+	.table > tbody > tr > td, 
+	.table > tbody > tr > th, 
+	.table > tfoot > tr > td, 
+	.table > tfoot > tr > th, 
+	.table > thead > tr > td, 
+	.table > thead > tr > th {
+		padding-left: 4px;
+		padding-right: 4px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		line-height: 1.42857143;
+		vertical-align: top;
+		border-top: 1px solid #ddd;
+	}
+	.inCompanies [uis-transclude-append],
+	.inOrigin [uis-transclude-append],
+	.inCompanies .ui-select-match-text
+	{
+		text-transform: uppercase;
+	}
+
+	#tblLoadsItems td {
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+</style>
+
+<div ng-controller="LoadsController" ng-init="refresh()" ng-cloak>
+    <div class="row">
+        <div class="col-md-3">
+            <h2 ng-if="!data.ShowDeleted">Total loads: <span>{{ data.TotalLoads }}</span></h2>
+            <h2 ng-if="data.ShowDeleted">Deleted assets</h2>
+        </div>
+        <div class="col-md-4">
+            <h2>Total selected: {{ selectedCount }}</h2>
+        </div>
+        <div class="col-md-3">
+            <h2 ng-if="data.List.length != data.ListFiltered.length || filter.DateFrom || filter.DateTo || filter.Id">Filtered loads: {{ data.ListFiltered.length }}</h2>
+		</div>
+		<div class="col-md-2">
+			<button class="btn btn-success pull-right" style="margin-top: 20px;" type="button" ng-click="editLoad(null, frmEditLoad)">Add <span class="glyphicon glyphicon-plus"></span></button>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 15px;">
+        <div class="col-md-7">
+            <button class="btn btn-default" type="button" ng-click="changeShowDeleted()">
+                <span ng-if="!data.ShowDeleted">Show Deleted</span>
+                <span ng-if="data.ShowDeleted">Show Assets</span>
+            </button>
+            <button class="btn btn-info" type="button" ng-click="clearSelections()">{{ selectedCount == 0 ? 'Select All' : 'Clear Selections'}}</button>
+            <button class="btn btn-info" type="button" ng-click="clearFilters()"style="background-color: darkturquoise;">Clear Filters</button>
+            <button class="btn btn-primary" type="button" ng-click="startImport()" style="margin-left: 15px; background-color: orange;">Import</button>
+            <button class="btn btn-primary" type="button" ng-click="startExport()" style="margin-right: 15px;  background-color: purple;">Export</button>
+            <button class="btn btn-primary" type="button" ng-click="refreshDAT()">Refresh</button>
+			<button class="btn btn-warning" type="button" ng-click="recover()" ng-if="data.ShowDeleted">Recover</button>
+            @*
+            <button class="btn btn-info" type="button" ng-click="refresh()">Refresh</button>
+            *@
+        </div>
+        <div class="col-md-3">
+            <p><b>Last DAT refresh time: </b>{{ data.LastRefreshDAT }}</p>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-danger pull-right" type="button" ng-click="delete()">Delete Selected</button>
+        </div>
+    </div>
+    <div class="row table-row">
+        <div class="col-md-12">
+            <table class="table table-striped" id="tblLoads" style="margin-bottom: 0px;">
+                <tr class="loadslistrow1 pad4">
+                    <td>
+                        <input class="form-control" ng-model="filter.Id" placeholder="Id" ng-blur="refresh()" my-enter="refresh()" maxlength="7" style="height: 22px !important;" />
+                    </td>
+                    <td>
+                        <input class="form-control" ng-model="filter.RefId" placeholder="Ref Id" ng-blur="refresh()" my-enter="refresh()" style="height: 22px !important;" />
+                    </td>
+                    <td colspan="3">
+                        <span ng-if="filter.DateFrom && filter.DateTo">
+                            <span>
+                                <b>
+                                    {{filter.DateFrom | amDateFormat:'L'}}
+                                </b>
+                            </span>
+                            -
+                            <span>
+                                <b>
+                                    {{filter.DateTo | amDateFormat:'L'}}
+                                </b>
+                            </span>
+                        </span>
+                        <span ng-if="filter.DateFrom && !filter.DateTo">
+                            <span><b>{{filter.DateFrom | amDateFormat:'L'}}</b></span>
+                            -
+                            <span><b>Any</b></span>
+                        </span>
+                        <span ng-if="!filter.DateFrom && filter.DateTo">
+                            <span><b>Any</b></span>
+                            -
+                            <span><b>{{filter.DateTo | amDateFormat:'L'}}</b></span>
+                        </span>
+                        <b>
+                            <span ng-if="!filter.DateFrom && !filter.DateTo">Date</span>
+                        </b>
+                        <button class="btn btn-default" ng-click="showFilterDate()" style="height: 22px !important; padding-top: 2px;">...</button>
+                    </td>
+                    <td></td>
+                    <td colspan="1">
+                        <ui-select multiple ng-model="filter.Companies" class="form-control headeruis inCompanies" my-ui-select
+                                   theme="bootstrap" 
+                                   close-on-select="false" 
+                                   on-select="refresh()"
+                                   on-remove="refresh()"
+                                   @*on-select="doFilter()"
+                                   on-remove="doFilter()"*@
+                                   qremove-selected="false"
+                                   style="width: 150px; padding: 0px;">
+                            <ui-select-match placeholder="Select a company...">{{$item}}</ui-select-match>
+                            <ui-select-choices repeat="item in data.AllCompanies | filter:$select.search">
+                                {{item}}
+                            </ui-select-choices>
+                            <ui-select-no-choice ng-style="!$select.search && {'display': 'none'}">
+                                <span ng-show="$select.search">Company not in list</span>
+                            </ui-select-no-choice>
+                        </ui-select>
+                    </td>
+                    <td colspan="1">
+                        <ui-select multiple ng-model="filter.OriginCities" class="form-control headeruis inOrigin" uis-open-close="searchCity()" my-ui-select
+                                   theme="bootstrap" 
+                                   close-on-select="false" 
+                                   on-select="refresh()"
+                                   on-remove="refresh()"
+                                   style="width: 150px; padding: 0px;">
+                            <ui-select-match placeholder="Select a city...">{{$item}}</ui-select-match>
+                            @*<ui-select-choices repeat="item in data.AllCities | filter:$select.search">*@
+                            <ui-select-choices refresh="searchCity($select)" refresh-delay="300" repeat="item in Cities">
+                                {{item}}
+                            </ui-select-choices>
+                        </ui-select>
+                    </td>
+                    <td>
+                        <ui-select multiple ng-model="filter.OriginStates" class="form-control headeruis" my-ui-select
+                                   theme="bootstrap" 
+                                   close-on-select="false" 
+                                   on-select="refresh()"
+                                   on-remove="refresh()"
+                                   style="width: 50px; padding: 0px;">
+                            <ui-select-match placeholder="ST">{{$item}}</ui-select-match>
+                            <ui-select-choices repeat="item in data.AllStates | filter:$select.search">
+                                {{item}}
+                            </ui-select-choices>
+                        </ui-select>
+                    </td>
+                    <td colspan="1">
+                        <ui-select multiple ng-model="filter.DestinationCities" class="form-control headeruis" uis-open-close="searchCity()" my-ui-select
+                                   theme="bootstrap" 
+                                   close-on-select="false" 
+                                   on-select="refresh()"
+                                   on-remove="refresh()"
+                                   style="width: 150px; padding: 0px;">
+                            <ui-select-match placeholder="Select a city...">{{$item}}</ui-select-match>
+                            @*<ui-select-choices repeat="item in data.AllCities | filter:$select.search">*@
+                            <ui-select-choices refresh="searchCity($select)" refresh-delay="300" repeat="item in Cities">
+                                {{item}}
+                            </ui-select-choices>
+                        </ui-select>
+                    </td>
+                    <td>
+                        <ui-select multiple ng-model="filter.DestinStates" class="form-control headeruis" my-ui-select
+                                   theme="bootstrap" 
+                                   close-on-select="false" 
+                                   on-select="refresh()"
+                                   on-remove="refresh()"
+                                   @*on-select="doFilter()"
+                                   on-remove="doFilter()"*@
+                                   style="width: 50px; padding: 0px;">
+                            <ui-select-match placeholder="ST">{{$item}}</ui-select-match>
+                            <ui-select-choices repeat="item in data.AllStates | filter:$select.search">
+                                {{item}}
+                            </ui-select-choices>
+                        </ui-select>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                <tr class="loadslistrow2 pad4">
+                    <th style="cursor: pointer;" ng-click="sort(getSort('LoadId'))" ng-class="{ 'warning': data.Sort.indexOf('LoadId') != -1 }">
+                        Load #
+                        <span ng-if="data.Sort == 'LoadId_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'LoadId_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sort(getSort('RefId'))" ng-class="{ 'warning': data.Sort.indexOf('RefId') != -1 }">
+                        Ref Id
+                        <span ng-if="data.Sort == 'RefId_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'RefId_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sortDate()" class="warning">
+                        Pick Date
+                        <span ng-if="data.SortDate == 1" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.SortDate == 2" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th>
+                        Uploaded
+                    </th>
+                    <th>
+                        Len.
+                    </th>
+                    <th>
+                        Eq. Type
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sort(getSort('CompanyName'))" ng-class="{ 'warning': data.Sort.indexOf('CompanyName') != -1 }">
+                        Company Name
+                        <span ng-if="data.Sort == 'CompanyName_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'CompanyName_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sort(getSort('OriginCity'))" ng-class="{ 'warning': data.Sort.indexOf('OriginCity') != -1 }">
+                        Origin City
+                        <span ng-if="data.Sort == 'OriginCity_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'OriginCity_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sort(getSort('OriginState'))" ng-class="{ 'warning': data.Sort.indexOf('OriginState') != -1 }">
+                        State
+                        <span ng-if="data.Sort == 'OriginState_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'OriginState_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sort(getSort('DestinCity'))" ng-class="{ 'warning': data.Sort.indexOf('DestinCity') != -1 }">
+                        Destin City
+                        <span ng-if="data.Sort == 'DestinCity_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'DestinCity_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th style="cursor: pointer;" ng-click="sort(getSort('DestinState'))" ng-class="{ 'warning': data.Sort.indexOf('DestinState') != -1 }">
+                        State
+                        <span ng-if="data.Sort == 'DestinState_asc'" class="glyphicon glyphicon-sort-by-alphabet"></span>
+                        <span ng-if="data.Sort == 'DestinState_desc'" class="glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                    </th>
+                    <th>
+                        Carrier $
+                    </th>
+                    <th>
+                        Cust $
+                    </th>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-12" style="overflow-y: scroll; overflow-x: hidden;" ng-style="{'max-height': getTableHeigth()}">
+            <table class="table table-striped" id="tblLoadsItems">
+                <tr class="loadslistrow2" ng-repeat="item in data.ListFiltered" ng-click="itemClick(item, $event)" ng-class="{ 'success' : item.selected, 'danger' : item.DateDatDeleted && !item.selected && data.ShowDeleted }" style="cursor: pointer;">
+                    <td>
+                        <a href="#" ng-click="editLoad(item, frmEditLoad)">
+                            {{ item.Id }}
+                        </a>
+                    </td>
+                    <td>
+						{{ item.ClientLoadNum }}
+                    </td>
+                    <td>
+                        {{ item.PickUpDate | amDateFormat: 'L' }}
+                    </td>
+                    <td>
+                        <span ng-if="item.AssetId" ng-class="{ 'text-danger' : item.DateDatDeleted }" title="{{ item.DateDatDeleted ? 'DELETED' : item.AssetId }}"> DAT </span>
+                        @*<span ng-if="item.TrackStopId" ng-class="{ 'text-danger' : item.DateTSDeleted }" title="{{ item.DateTSDeleted ? 'DELETED' : item.TrackStopId }}"> TS </span>*@                        
+                        <span ng-if="item.TsLoadId" ng-class="{ 'text-danger' : item.DateTSDeleted }" title="{{ item.DateTSDeleted ? 'DELETED' : item.TsLoadId }}"> TS </span>                        
+                    </td>
+                    <td>
+                        {{ item.AssetLength }}
+                    </td>
+                    <td title="{{ toUpperCase(item.LoadType == null ? item.EquipmentType : item.LoadType.Name,  10) }}">
+						{{ noWrap(item.LoadType == null ? item.EquipmentType : item.LoadType.Name, 10) }}
+                    </td>
+                    <td style="text-transform: uppercase" title="{{ toUpperCase(item.ClientName, 18) }}">
+                        {{ noWrap(item.ClientName, 18) }}
+                    </td>
+                    <td style="text-transform: uppercase" title="{{ toUpperCase(item.Origin.City, 21) }}">
+                        {{ noWrap(item.Origin.City, 21) }}
+                    </td>
+                    <td>
+                        {{ item.Origin.State.Code }}
+                    </td>
+                    <td title="{{ toUpperCase(item.Destination.City, 21) }}">
+						{{ noWrap(item.Destination.City, 21) }}
+                    </td>
+                    <td>
+                        {{ item.Destination.State.Code }}
+                    </td>
+                    <td>
+                        $ {{ item.CarrierAmount | number }}
+                    </td>
+                    <td>
+                        $ {{ item.CustomerAmount | number }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-2" style="margin-top: 5px;">
+            <div class="input-group" ng-if="data.PageCount > 0">
+                <span class="input-group-btn">
+                    <a href="#" class="btn btn-default" ng-click="refresh(1)" ng-class="{'disabled' : data.Page == 1}" title="1">&lt;&lt;</a>
+                    <a href="#" class="btn btn-default" ng-click="refresh(data.Page - 1)" ng-class="{'disabled' : data.Page == 1}" title="{{data.Page - 1}}">&lt;</a>
+                </span>
+                @*<input ng-if="!data.ShowDeleted" class="form-control" type="text" style="width: 60px;" ng-model="data.Page" ng-change="refresh()">*@
+                <select class="form-control" ng-model="data.Page" style="width: 60px;" ng-change="refresh()">
+                    <option ng-repeat="x in [].constructor(data.PageCount) track by $index" ng-value="{{$index + 1}}">{{$index + 1}}</option>
+                </select>
+                <span class="input-group-btn">
+                    <a href="#" class="btn btn-default disabled">/{{data.PageCount}}</a>
+                    <a href="#" class="btn btn-default" ng-click="refresh(data.Page + 1)" ng-class="{'disabled' : data.Page == data.PageCount}" title="{{data.Page + 1}}">&gt;</a>
+                    <a href="#" class="btn btn-default" ng-click="refresh(data.PageCount)" ng-class="{'disabled' : data.Page == data.PageCount}" title="{{data.PageCount}}">&gt;&gt;</a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalDates" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Date period filter</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Date from</label>
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="dateFilter(1, -1)">
+                                        <span class="glyphicon glyphicon-chevron-left"></span>
+                                    </button>
+                                </span>
+                                <input class="form-control" datepicker ng-model="filter.DateFromD" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="dateFilter(1, 1)">
+                                        <span class="glyphicon glyphicon-chevron-right"></span>
+                                    </button>
+                                </span>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="filter.DateFromD = ''">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Date to</label>
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="dateFilter(2, -1)">
+                                        <span class="glyphicon glyphicon-chevron-left"></span>
+                                    </button>
+                                </span>
+                                <input class="form-control" datepicker ng-model="filter.DateToD" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="dateFilter(2, 1)">
+                                        <span class="glyphicon glyphicon-chevron-right"></span>
+                                    </button>
+                                </span>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" ng-click="filter.DateToD = ''">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" ng-click="filterDate()">Filter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalZipRange" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Zip range filter</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>From</label>
+                        <input class="form-control" type="number" ng-model="filter.RangeFrom" />
+                    </div>
+                    <div class="form-group">
+                        <label>To</label>
+                        <input class="form-control" type="number" ng-model="filter.RangeTo" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" ng-click="filterZip()">Filter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT DIALOG -->
+    <div class="modal fade" id="modalLoad" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form name="frmEditLoad" novalidate autocomplete="off">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" tabindex="-1"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">{{ currentLoad.id == 0 ? 'Add Load' : data.ShowDeleted ? 'View Load' : 'Edit Load' }}</h4>
+                    </div>
+                    <fieldset ng-disabled="data.ShowDeleted">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Reference Id</label>
+                                        <input class="form-control ClientLoadNum" style="max-width: 100px;" ng-model="currentLoad.ClientLoadNum" title="{{currentLoad.ClientLoadNum}}" ng-readonly="currentLoad.CreatedBy == 'ParseEmails United Rentals'" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Loadboard Ref ID</label>
+                                        <input class="form-control" style="max-width: 100px;" ng-model="currentLoad.PostersReferenceId" title="{{currentLoad.PostersReferenceId}}" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>AST ID</label>
+                                        <input class="form-control" ng-model="currentLoad.Id" title="{{currentLoad.ClientLoadNum}}" readonly tabindex="-1" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group" ng-class="{'has-error': frmEditLoad.$submitted && frmEditLoad.DateLoaded.$invalid}">
+                                        <label>Load Date</label>
+                                        <input class="form-control" name="DateLoaded" ng-model="currentLoad.DateLoaded" datepicker mo-date-input="L" required tabindex="-1" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Company Name</label>
+                                        <ui-select ng-model="currentLoad.ClientName" class="form-control inCompanies" name="ClientName" tabindex="-1"
+                                                    theme="bootstrap" 
+                                                    style="max-width: 280px; padding: 0px;">
+                                            <ui-select-match placeholder="Select a Company...">{{currentLoad.ClientName}}</ui-select-match>
+                                            <ui-select-choices repeat="item in data.AllCompanies | filter:$select.search" refresh="refreshCompany($select)" refresh-delay="0">
+                                                {{item}}
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.LoadType.$invalid }">
+                                        <label>Equipment Type</label>
+                                        <ui-select ng-model="currentLoad.LoadType" class="form-control" ng-required="true" required name="LoadType"
+                                                   focus-on="UiSelectLoadType"
+                                                   qautofocus="true"
+                                                   theme="bootstrap" 
+                                                   style="width: 280px; padding: 0px;">
+                                            <ui-select-match placeholder="Select a Load Type...">{{currentLoad.LoadType.Name}}</ui-select-match>
+                                            <ui-select-choices repeat="item in data.AllLoadTypes | filter:$select.search">
+                                                {{item.Name}}
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Length</label>
+                                        <input class="form-control" type="number" ng-model="currentLoad.AssetLength" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Weight</label>
+                                        <input class="form-control" type="number" ng-model="currentLoad.Weight" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.Amount.$invalid }">
+                                        <label>Carrier $</label>
+                                        <input class="form-control" ng-model="currentLoad.CarrierAmount" type="number" min="0" name="Amount" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.Amount.$invalid }">
+                                        <label>Cust $</label>
+                                        <input class="form-control" ng-model="currentLoad.CustomerAmount" type="number" min="0" name="Amount" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group inOrigin" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.Origin.$invalid }">
+                                        <label>Origin City</label>
+                                        <angucomplete-alt id="OriginAC"
+                                            placeholder="Select a City..."
+                                            pause="100"
+                                            selected-object="currentLoad.OriginAC"
+                                            initial-value="currentLoad.Origin"
+                                            local-data="data.OriginDestinations"
+											local-search="originSearch"
+											focus-out="orginDestinFocusOut(1)"
+                                            search-fields="City"
+                                            title-field="City"
+                                            description-field="State.Code"
+                                            minlength="1"
+                                            input-changed="setOriginDestinations('Origin')"
+                                            auto-match="true"
+											text-no-results="false"
+                                            input-class="form-control form-control-small autocompleteoff text-uppercase" />
+                                        <span class="text-danger" ng-if="frmEditLoad.$submitted && frmEditLoad.OriginState.$invalid">Please specify both City and two letter State</span>
+                                    </div>
+									<span class="text-danger" ng-show="originDestinCityInvalid == 1">{{originDestinCityInvalidText}}</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.OriginState.$invalid }">
+                                        <label>Origin State</label>
+                                        <input class="form-control" tabindex="-1" readonly ng-model="currentLoad.Origin.State.Code" required name="OriginState" ng-minlength="2" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.Destination.$invalid }">
+                                        <label>Destination City</label>
+                                        <angucomplete-alt id="DestinationAC"
+                                            placeholder="Select a City..."
+                                            pause="100"
+                                            selected-object="currentLoad.DestinationAC"
+                                            initial-value="currentLoad.Destination"
+                                            local-data="data.OriginDestinations"
+											local-search="destinSearch"
+											focus-out="orginDestinFocusOut(2)"
+                                            search-fields="City"
+                                            title-field="City"
+                                            description-field="State.Code"
+                                            minlength="1"
+                                            input-changed="setOriginDestinations('Destination')"
+                                            auto-match="true"
+											text-no-results="false"
+                                            input-class="form-control form-control-small autocompleteoff text-uppercase"/>
+                                        <span class="text-danger" ng-if="frmEditLoad.$submitted && frmEditLoad.OriginState.$invalid">Please specify both City and two letter State</span>
+                                        <span class="text-danger" ng-if="frmEditLoad.$submitted && frmEditLoad.DestinationState.$invalid">Please specify both City and two letter State</span>
+                                    </div>
+									<span class="text-danger" ng-show="originDestinCityInvalid == 2">{{originDestinCityInvalidText}}</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.DestinationState.$invalid }">
+                                        <label>Destination State</label>
+                                        <input class="form-control" tabindex="-1" readonly ng-model="currentLoad.Destination.State.Code" required name="DestinationState" ng-minlength="2" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+								<div class="col-md-6">
+									<div class="col-md-3">
+										<div class="form-group" style="margin-bottom: 5px;">
+											<label>Is Load Full
+												<input class="form-control" type="checkbox" ng-model="currentLoad.IsLoadFull" ng-checked="currentLoad.IsLoadFull" />
+											</label>
+										</div>
+									</div>
+									<div class="col-md-4">
+										<div class="form-group" style="margin-bottom: 5px;" ng-class="{'has-error': frmEditLoad.$submitted && frmEditLoad.UntilDate.$invalid}">
+											<label>Until Date</label>
+											<div>
+												<input class="form-control" name="DateLoaded" ng-model="currentLoad.UntilDate" datepicker mo-date-input="L" autocomplete="new-password" />
+											</div>
+										</div>
+									</div>
+									<div class="col-md-5">
+										<div class="form-inline">
+											<label style="width: 80px; margin-bottom: 0px;">Roll over to</label>
+											<div>
+												<label style="width: 80px; margin-bottom: 0px;">Saturday</label>
+												<input class="form-control" style="width: 16px; height: 16px;" type="checkbox" ng-model="currentLoad.AllowUntilSat" ng-checked="currentLoad.AllowUntilSat" />
+											</div>
+											<div>
+												<label style="width: 80px; margin-bottom: 0px;">Sunday</label>
+												<input class="form-control" style="width: 16px; height: 16px;" type="checkbox" ng-model="currentLoad.AllowUntilSun" ng-checked="currentLoad.AllowUntilSun" />
+											</div>
+										</div>
+									</div>
+								</div>
+                                <div class="col-md-3">
+                                    <div class="form-group" style="margin-bottom: 5px;" ng-class="{ 'has-error': frmEditLoad.$submitted && frmEditLoad.PickUpDate.$invalid }">
+                                        <label>PickUp Date</label>
+                                        <div class="input-group">
+                                            <input class="form-control" style="padding-left: 9px; padding-right: 9px;" type="text" name="PickUpDate" ng-model="currentLoad.PickUpDate" datepicker mo-date-input="L" required autocomplete="off" />
+                                            <span class="input-group-btn" style="width:0px;"></span>
+                                            <input class="form-control" type="text" style="width: 100px;" ng-model="currentLoad.PickUpDateTime" datepicker mo-date-input="LT" />                                    
+                                        </div>
+                                        <span class="text-danger" ng-if="frmEditLoad.$submitted && frmEditLoad.PickUpDate.$invalid">Please specify PickUp Date</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group" style="margin-bottom: 5px;">
+                                        <label>Delivery Date</label>
+                                        <div class="input-group">
+                                            <input class="form-control" style="padding-left: 9px; padding-right: 9px;" type="text" ng-model="currentLoad.DeliveryDate" datepicker mo-date-input="L" autocomplete="off" />
+                                            <span class="input-group-btn" style="width:0px;"></span>
+                                            <input class="form-control" type="text" style="width: 100px;" ng-model="currentLoad.DeliveryDateTime" datepicker mo-date-input="LT" />                                    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6" style="padding-right: 2px">
+                                    <label>Description</label>
+                                    <textarea class="form-control" cols="50" rows="8" ng-model="currentLoad.Description"></textarea>
+                                </div>
+                                <div class="col-md-6" style="padding-left: 2px">
+                                    <label>User Notes</label>
+                                    <textarea class="form-control" cols="50" rows="8" ng-model="currentLoad.UserNotes"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="modal-footer">
+                        <p class="pull-left text-danger" ng-if="frmEditLoad.$submitted && frmEditLoad.$invalid">Please specify all the required fields</p>
+                        <button type="button" class="btn btn-default" ng-click="showViewRecord()">View Record</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        @*
+                        <button type="button" class="btn btn-primary" ng-disabled="!currentLoad.Id" ng-click="updateDAT(frmEditLoad)">
+                            Update DAT
+                        </button>
+                        *@
+                        <button type="button" class="btn btn-primary" ng-click="saveLoad(frmEditLoad)" ng-disabled="data.ShowDeleted">
+                            {{ currentLoad.Id ? 'Save Load' : 'Add Load' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEWRECORD DIALOG -->
+    <div class="modal fade" id="modalViewRecord" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel" ng-click="IsDebugMode = !IsDebugMode">View Record</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Create Date</label>
+                                <input class="form-control" ng-model="currentLoad.CreateDate" readonly mo-date-input="L LT" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Created By</label>
+                                <input class="form-control" ng-model="currentLoad.CreatedBy" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Create Loc</label>
+                                <input class="form-control" ng-model="currentLoad.CreateLoc" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Update Date</label>
+                                <input class="form-control" ng-model="currentLoad.UpdateDate" readonly mo-date-input="L LT" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Update By</label>
+                                <input class="form-control" ng-model="currentLoad.UpdatedBy" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Update Loc</label>
+                                <input class="form-control" ng-model="currentLoad.UpdateLoc" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" ng-show="IsDebugMode">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>ID</label>
+                                <input class="form-control" ng-model="currentLoad.Id" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>DAT ID</label>
+                                <input class="form-control" ng-model="currentLoad.AssetId" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>TS ID</label>
+                                <input class="form-control" ng-model="currentLoad.TsLoadId" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="IsDebugMode">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Client Load Num</label>
+                                <input class="form-control" ng-model="currentLoad.ClientLoadNum" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>DAT DELETED</label>
+                                <input class="form-control" ng-model="currentLoad.DateDatDeleted" readonly mo-date-input="L LT" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>TS DELETED</label>
+                                <input class="form-control" ng-model="currentLoad.DateTSDeleted" readonly mo-date-input="L LT" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Comments</label>
+                                <textarea class="form-control" cols="50" rows="10" readonly ng-model="currentLoad.Comments">
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPLOAD TO SERVICES DIALOG -->
+    <div class="modal fade" id="modalLoadingToLoadBoard" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form name="frmLoadingToLoadBoard" novalidate>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Loading to loadboards</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p ng-if="!currentLoad.Uploaded">Loading to loadboards, one moment"</p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>AST ID</label>
+                                    <input class="form-control" ng-model="currentLoad.Id" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>DAT ID</label>
+                                    <input class="form-control" ng-model="currentLoad.AssetId" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>TS ID</label>
+                                    <input class="form-control" ng-model="currentLoad.TsLoadId" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" ng-if="currentLoad.Uploaded">
+                            <div class="col-md-12">
+                                <div class="form-group" ng-if="currentLoad.Id > 0">
+                                    <input type="checkbox" ng-checked="currentLoad.AssetId != null" disabled /> DAT
+                                    <input type="checkbox" ng-checked="currentLoad.TsLoadId != null" disabled /> TS
+                                    <label ng-if="uploadErrors.length == 0"" class="text-success">Successfully loaded to the checked loadboards</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" ng-if="currentLoad.Uploaded && uploadErrors.length > 0">
+                            <div class="col-md-12">
+                                <table class="table table-striped">
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Message</th>
+                                    </tr>
+                                    <tr ng-repeat="item in uploadErrors">
+                                        <td>{{ item.IsTS ? "TS" : ""}} {{ item.IsDAT ? "DAT" : ""}}</td>
+                                        <td>{{ item.Message }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" ng-click="uploadModalHide()">OK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPORT DIALOG -->
+    <div class="modal fade" id="modalImport" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form name="frmImport" novalidate>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Import loads</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div ng-show="!importLog">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Select a file</label>
+                                        <input class="form-control" type="file" file-model="importFile" id="importFile" accept=".xls,.xlsx" style="width: 100%;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" ng-if="importResult.LoadsCount && importResult.LoadsImported">
+                                <div class="col-md-12">
+                                    <p class="text-success">Loads in file {{ importResult.LoadsCount }}</p>
+                                    @*<p class="text-success">Imported loads {{ importResult.LoadsImported }}</p>*@
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p ng-class="{ 'text-danger': error.m_Item1 >= 0, 'text-success' : error.m_Item1 < 0 }" ng-repeat="error in importResult.Messages">{{ error.m_Item2 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-show="importLog">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Date and time</th>
+                                    <th>File name</th>
+                                    <th>File size</th>
+                                    <th>File Date and time</th>
+                                </tr>
+                                <tr ng-repeat="item in importLog.list">
+                                    <td>{{ item.Created | amDateFormat:'L LT' }}</td>
+                                    <td>{{ item.FileName }}</td>
+                                    <td>{{ item.FileSize }}</td>
+                                    <td>{{ item.FileDateTime | amDateFormat:'L LT' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" ng-if="!importResult.LoadsCount && !importLog" class="btn btn-primary" ng-click="startImport(true)">Import</button>
+                        <button type="button" ng-if="!importResult.LoadsCount" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" ng-if="importResult.LoadsCount" class="btn btn-default" data-dismiss="modal">OK</button>
+                        <button type="button" ng-show="!importLog" class="btn btn-default" ng-click="viewImportLog()">View Import Log</button>
+                        <button type="button" ng-show="importLog" class="btn btn-default" ng-click="importLog = false">View Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.table-row').height(window.innerHeight - 250);
+        $('.autocompleteoff').on('focus', function(obj) { // disable autofill
+            $('input').removeAttr('autocomplete');
+            $(this).attr('autocomplete', 'new-password');
+        })
+    });
+</script>

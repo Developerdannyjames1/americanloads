@@ -1,0 +1,109 @@
+﻿@using ASTDAT.Data.Models
+
+@model ASTDAT.Web.Infrastructure.MercuryGate.BidsResult<ASTDAT.Data.Models.LoadModel>
+
+@{
+    ViewBag.Title = "MercuryGate";
+}
+
+<h2>MercuryGate</h2>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <tr>
+                <th><b>Local Load</b></th>
+                <th>Respond By</th>
+                <th>Load Id</th>
+                <th>Load Client Id</th>
+                <th>Origin City</th>
+                <th>Origin State</th>
+                <th>Pickup Range</th>
+                <th>Destination City</th>
+                <th>Destination State</th>
+                <th>Delivery Range</th>
+                <th>Current Bid</th>
+                <th>Lowest Bid</th>
+                <th>Book It Now</th>
+                <th>Number of Stops</th>
+                <th>Load Owner</th>
+                <th>Equipment</th>
+                <th>Load Planner</th>
+            </tr>
+            @foreach(var item in Model.Loads)
+            {
+                <tr>
+                    <td>
+                        @if (item.AdvancedData != null)
+                        {
+                            <b>
+                                @item.AdvancedData.Id
+                            </b>
+                            if (item.AdvancedData.DateDatDeleted.HasValue && item.AdvancedData.DateTSDeleted.HasValue)
+                            {
+                                <b>DELETED</b>
+                            }
+                        }
+                    </td>
+                    <td>@item.RespondBy</td>
+                    <td>@item.LoadId</td>
+                    <td>@item.LoadClientId</td>
+                    <td>@item.OriginCity</td>
+                    <td>@item.OriginState</td>
+                    <td>@item.PickupRange</td>
+                    <td>@item.DestinationCity</td>
+                    <td>@item.DestinationState</td>
+                    <td>@item.DeliveryRange</td>
+                    <td>@item.CurrentBid</td>
+                    <td>@item.LowestBid</td>
+                    <td>@item.BookItNow</td>
+                    <td>@item.NumberOfStops</td>
+                    <td>@item.LoadOwner</td>
+                    <td>@item.Equipment</td>
+                    <td>@item.LoadPlanner</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>REMOVED</h2>
+        @foreach(var load in (List<LoadModel>) ViewBag.Removed)
+        {
+            <p>@load.Id</p>
+        }
+    </div>
+</div>
+
+@if (Model.Exceptions != null)
+{
+    <h2>Exceltion</h2>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <tr>
+                    <th>Message</th>
+                    <th>Stack Trace</th>
+                </tr>
+                @foreach (var item in Model.Exceptions)
+                {
+                    <tr>
+                        <td>
+                            <div>@item.Message</div>
+                            @if (item.InnerException != null)
+                            {
+                                <div>@item.InnerException.Message</div>
+                            }
+                        </td>
+                        <td>
+                            <pre>@item.StackTrace</pre>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+}

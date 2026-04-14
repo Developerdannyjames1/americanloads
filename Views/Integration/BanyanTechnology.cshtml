@@ -1,0 +1,29 @@
+﻿@model List<ASTDAT.Tools.BanyanTechnologyUtils.LoadModel>
+
+@{
+    ViewBag.Title = "BanyanTechnology";
+}
+
+<h2>BanyanTechnology <b>@Model.Count</b></h2>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <tr>
+                <th>Id</th>
+                <th>BOL</th>
+                <th>JSON</th>
+            </tr>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.LoadId</td>
+                    <td>@item.BOLNum</td>
+                    <td>
+                        <pre>@Newtonsoft.Json.JsonConvert.SerializeObject(item).Replace("\",\"", "\",\r\n\"").Replace("{", "{\r\n").Replace("}", "}\r\n")</pre>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

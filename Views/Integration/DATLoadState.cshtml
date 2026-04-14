@@ -1,0 +1,123 @@
+﻿@model DATService.ServiceReference1.LookupAssetSuccessData
+
+@{
+    ViewBag.Title = "DATLoadState";
+    var removed = (List<string>)ViewBag.Removed;
+}
+
+<h2>DATLoadState</h2>
+
+@if (Request.IsAuthenticated && User.Identity.Name.ToLower().StartsWith("admin"))
+{
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <tr>
+                        <th># / #</th>
+                        <th>ltl</th>
+                        <th>expired</th>
+                        <th>created</th>
+                        <th>endDate</th>
+                        <th>lastModified</th>
+                        <th>startDate</th>
+                        <th>updated</th>
+                        <th>availability latest</th>
+                        <th>availability earliest</th>
+                        <th>status</th>
+						<th>pickupdate</th>
+                    </tr>
+                    @if (Model != null && Model.assets != null)
+                    {
+                        var c = 0;
+                        foreach (var asset in Model.assets)
+                        {
+                            c++;
+                            <tr>
+                                <td>@asset.assetId / @c</td>
+                                <td>@asset.ltl</td>
+                                <td>@asset.status.expired</td>
+                                <td>@(asset.status.created?.date)</td>
+                                <td>@asset.status.endDate</td>
+                                <td>@(asset.status.lastModified?.date)</td>
+                                <td>@asset.status.startDate</td>
+                                <td>@(asset.status.updated?.date)</td>
+                                <td>@asset.availability.latest</td>
+                                <td>@asset.availability.earliest</td>
+                                <td>
+                                    <div><b>created:</b>@asset.status.created.date / @asset.status.created.user</div>
+                                    <div><b>endDate:</b>@asset.status.endDate</div>
+                                    <div><b>expired:</b>@asset.status.expired</div>
+                                    <div><b>lastModified:</b>@asset.status.lastModified.date / @asset.status.lastModified.user</div>
+                                    <div><b>startDate:</b>@asset.status.startDate</div>
+                                    <div><b>updated:</b>@asset.status.updated.date / @asset.status.updated.user</div>
+                                    <div><b>userId:</b>@asset.status.userId</div>
+                                </td>
+								<td>@asset.availability.earliest</td>
+                            </tr>
+                            <tr>
+                                <td colspan="12">
+                                    <div>
+                                        <a class="btn btn-primary" role="button" data-toggle="collapse" href="#cl_@asset.assetId" aria-expanded="false" aria-controls="cl_@asset.assetId">
+                                            Show/Hide FULL JSON
+                                        </a>
+                                        <div class="collapse" id="cl_@asset.assetId">
+                                            <div class="well">
+                                                @{
+                                                    var json = "";
+                                                    try
+                                                    {
+                                                        json = Newtonsoft.Json.JsonConvert.SerializeObject(asset, Newtonsoft.Json.Formatting.Indented);
+                                                    }
+                                                    catch
+                                                    {
+
+                                                    }
+                                                }
+        <pre>
+        @Html.Raw(json)
+        </pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                                                        }
+                                                    }
+                </table>
+
+                @if (ViewBag.Removed != null)
+                {
+                    <h2>REMOVED</h2>
+                    <ul>
+                        @foreach (var item in removed)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                @if (ViewBag.LastExceptions != null)
+                {
+                    <p><b>Host: </b>@ASTDAT.Web.Infrastructure.IntegrationService.Instance.Session.Url</p>
+                    <p><b>UserName: </b>@ASTDAT.Web.Infrastructure.IntegrationService.Instance.Session.Username</p>
+                    <p><b>Password: </b>@ASTDAT.Web.Infrastructure.IntegrationService.Instance.Session.Password</p>
+                    foreach (Tuple<DateTime, Exception> item in ViewBag.LastExceptions)
+                    {
+                        <p>@item.Item1.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                        <p>@item.Item2.Message</p>
+                        <p>@(item.Item2.InnerException == null ? "" : item.Item2.InnerException.Message)</p>
+                        <p>@item.Item2.StackTrace</p>
+                        <br />
+                    }
+                }
+                else
+                {
+                    <p>No Exception</p>
+                }
+            </div>
+        </div>
+}

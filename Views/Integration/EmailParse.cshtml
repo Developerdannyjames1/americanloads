@@ -1,0 +1,11 @@
+﻿
+@{
+    ViewBag.Title = "EmailParse";
+    var started = (DateTime)ViewBag.Started;
+    var finished = (DateTime)ViewBag.Finished;
+}
+
+<h2><b>@ViewBag.Count </b> Loads Imported</h2>
+<h2>Started: <b>@started</b></h2>
+<h2>Finished: <b>@finished</b></h2>
+<h2>Total Seconds: <b>@((finished - started).TotalSeconds)</b></h2>
