@@ -1,0 +1,573 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>Banyan Technology - Freight Management System</title>
+    <link href="/Auxi/styles/Custom.css?4IEQW-GyYdNsj39TncNM_Z9SNjzw2HR2fESmOxoKi9M1" rel="stylesheet" />
+    <link href="/Auxi/styles/WebDispatch.css?SlUyoxF8ajqeJF_b-VBGRN0fbDrA9wKIyE0zRiZI1Uc1" rel="stylesheet" />
+    <link href="/Auxi/styles/jquery-ui.css?eYc2c666p_Nu5uy83nmbYV4LoTFzNJJ4BHdi0j8KhnY1" rel="stylesheet" />
+    <link href="/static/css/jquery.jgrowl.css?sP5IArvj0Tss-HgK7-I2Sk_HGYqR3zjrB5CBr09SZ5g1" rel="stylesheet" />
+    <link href="/Auxi/styles/jquery.fancybox.min.css?uR2U2LfOIFvrP-73bsBKZY0rOwcT9gKGf45FrwUL5Xc1" rel="stylesheet" />
+    <link href="/Auxi/styles/pagetracker.css?hzNVH8vVASgiGHLWUF-3dxX-wYwN_0A2H3ZT7A8Y9e01" rel="stylesheet" />
+    <link href="/Auxi/styles/BanyanTechnology.css?9DAMeZg-GviY-lufCFmdVrkl3Oz4Jiy449Q0P_Zi4MY1" rel="stylesheet" />
+    <link href="/Auxi/styles/font-awesome.min.css?eZrrJcwDc_3uDhsdt61sL2oOBY362qM3lon1gyExkL01" rel="stylesheet" />
+    <link href="/Auxi/styles/poopstrap.css?6QEJCewpRO2QhXK_tJ5lpOEiRT6oiOGCkIwlT2EjCho1" rel="stylesheet" />
+
+    <link href="/auxi/Styles/print.css" rel="stylesheet" />
+
+    <style id="CustomStyle" type="text/css">
+        .MainMenuHeaders {
+            background-color: #0060A9
+        }
+
+        .MainMenuHeaders {
+            color: #fff
+        }
+
+        .EZRateMenuHeaders {
+            background-color: #0060A9
+        }
+
+        .EZRateMenuHeaders {
+            color: #fff
+        }
+
+        .EZRateSubMenuHeaders {
+            background-color: #b0c4de
+        }
+
+        .EZRateSubMenuHeaders {
+            color: #000000
+        }
+
+        .EZRateSubMenuHeaders {
+            font-weight: bold
+        }
+
+        .RatesSubTableHeader {
+            font-size: 6pt
+        }
+
+        .ProductSubTableHeader {
+            font-size: 7pt
+        }
+
+        .panel-default > .panel-heading {
+            color: #fff;
+            background-color: #0060A9;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+        var ajax_loader_src = "/static/img/ajax-loader.gif";
+    </script>
+
+    <script src="/Auxi/scripts/app/banyan.globals.js?FsRLrFGQWrwJpG4JU7Tjnw2BRpbR3Fp4ZRaXve7eE0Q1"></script>
+    <script src="/scripts/jquery-1.12.4.min.js?ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ-Xp8a4MxAQ1"></script>
+    <script src="/scripts/jquery-migrate-1.2.1.min.js?s_ML5_ElSq1_4VAuLLPKJ3UQZm-aqeTDqB1VI3xW1GA1"></script>
+    <script src="/scripts/moment.js?j0xFVWCDJkYQTK9hG2ZRfenaNKYV8X3bang_XsE8_cU1"></script>
+    <script src="/scripts/jquery-ui-1.11.1.min.js?T3W1MnJa3O9e-1OBF0g91W_qMHsxPJQmhBFSc1x251U1"></script>
+    <script src="/scripts/jquery.fancybox.js?lGYI9J-diJJWwLLMD35V79cLhrxo7MYzNQImKJntuL01"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/resize.min.js?X0HkvAmPwadmZGvMUi2I7__U3F8YwQrHekpcQS-6g3w1"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/jquery.json-2.2.min.js?F0mcOqHBzO3myLHiGxmj3QG1GMz9HGMgXU-dw27cBg81"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/hashchange.min.js?-DUl8W_4Nf5XWL5vUx7NXk79zkZfWTXeBE8WJajQ17M1"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/block-ui.min.js?o0eEhkepDTpap7GquhJPdT2e5wHcgPkmrpM7eJ-rr_w1"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/jquery.timers-1.2.mod.js?Sm3KoTk-PI7IYpNtgDTCaOcUQ-QBMMZjmdkFHpJd2Iw1"></script>
+    <script src="/Auxi/scripts/general/Common.js?SIcfH33Ik-2KGnlrjSKJ5OPj-CgkL03w3riSBQcvGrM1"></script>
+    <script src="/Auxi/scripts/general/PanelEdit.js?RKGq3ncm60OFg-eczXHaphVnuWw1zvtElQFdfc9j4fw1"></script>
+    <script src="/Auxi/scripts/general/err.js?09ozq6xwmgpdsWJaNtScOVvmTEpS94Q1b_3lR5cQoXo1"></script>
+    <script src="/Auxi/scripts/cobrand/Validation.js?Ofv06scbz9L9RrBXCCrRIQ_Hs9T8D5t5gCC3nOeDsoI1"></script>
+    <script src="/Auxi/scripts/general/helpers/String.js?gKjpoDtudPGqFUVyCjEcX5uXSLyRvkikoVT6ui7GAFU1"></script>
+    <script src="/Auxi/scripts/general/helpers/Alert.js?hahJ7ra2dHeON0myhZ9zBUJSOZKLuR6wEUuwbPGJ51g1"></script>
+    <script src="/static/js/jquery.jgrowl.js?BjnMNnvo_ytkLO5bn768tFAaxKMz_o3mlOmB90jwOSs1"></script>
+    <script src="/Auxi/scripts/general/q/q.min.js?juhQ_mLlvPUolA1WtAsWe_30rDey-GJMbw90h2whbPU1"></script>
+    <script src="/Auxi/scripts/app/banyan.ajax.js?CjTz0NrSoHLWVglqZoipK_jpGVb5p4qgyEdKWsAVSoQ1"></script>
+    <script src="/Auxi/scripts/general/helpers/banyan.helper.paging.js?Uye3TdDqikZnYvNBmM4bX-0qdAhPsmFxSbSbaCQxAgA1"></script>
+    <script src="/Auxi/scripts/general/wait-time.js?6BgGciryqGvdfaDDd4G7o40lwixTLuT2X_7qRWhK31w1"></script>
+
+</head>
+<body id="ctl00_bdy">
+    <div class="liveDispatch-bar"></div>
+    <div class="enviroment-bar"></div>
+    <div id="wrapper">
+        <div id="ctl00_new_menu">
+            <div class="row"><div class="col-xs-12 text-center"><a href=""><img class="img-responsive center-block" src="/Auxi/images/CoBrand/MainHeaderRevised.gif" style="max-height: 160px;"></img></a></div></div>
+
+            <div class="container-fluid">
+                <div class="row banyan-main-menu">
+                    <nav class="navbar navbar-default" style="border-radius:0;">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#banyan-main-menu" aria-expanded="false">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="/cobrand/MainMenu.aspx"><i class="fa fa-home fa-fw"></i></a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="banyan-main-menu">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/cobrand/mainmenu.aspx?section=carrier_openloads">Open Loads</a></li>
+                                <li><a href="/cobrand/mainmenu.aspx?section=Carrier_AwardedQuotes">Awarded Quotes</a></li>
+                                <li><a href="/cobrand/mainmenu.aspx?section=carrier_loadissues">Load Issues</a></li>
+                                <li><a href="/cobrand/viewloads.aspx?searchtype=carrier&amp;show=DLVRD">Quote History</a></li>
+                                <li><a href="/cobrand/viewloads.aspx?searchtype=carrier&amp;show=CVRD">Covered Loads</a></li>
+                                <li><a href="/cobrand/viewloads.aspx?advSearch=true&amp;searchType=Carrier">Search Loads</a></li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i><i class="fa fa-caret-down fa-fw"></i></a>
+                                    <ul class="dropdown-menu">
+
+                                        <li><a href="/UserSettings/EditUserSettings">Edit User Settings</a></li>
+
+                                        <li role="separator" class="divider"></li>
+
+
+
+                                        <li><a href="/MasterPage/LogOut">Log Out</a></li>
+                                    </ul>
+
+                                </li>
+                            </ul>
+
+                        </div>
+                    </nav>
+                </div>
+
+                <div id="drawer" class="row banyan-main-menu">
+                    <div class="panel panel-default">
+                        <div class="panel-body" id="subMenuContent">
+                            <div class="row submenu-row">
+                                <div class="col-xs-3 submenu-user">
+                                    <span><em>Welcome,</em> <a href="/UserSettings/EditUserSettings">DA</a></span>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <strong class="submenu-carrier-name" title="American Specialized Transport, Inc.">American Specialized Transport, Inc.</strong>
+                                    <a href="javascript:" class="various btn btn-xs btn-default" id="change-client" data-src="/ChangeClient/WriteChangeUserClient2">Change Client</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+
+
+        <form method="post" action="./MainMenu.aspx" id="aspnetForm">
+            <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="KP63gpNREcEgGSBSuCCILfNvgVt0+mC7DY+Sc1elXZZOKvPYBdx9tgOdRQWGd4D4sHeAQ0AN2DignXtKxWIv2LmonQTqJa6bS02I8IxlEQ0=" />
+
+
+            <script type="text/javascript">
+                //<![CDATA[
+                $('#change-client').attr('href', '#').removeClass('various');//]]>
+            </script>
+
+            <script src="/ScriptResource.axd?d=nnHyWnZ5bTPuYszCeiYmK2W9wXo4cyngLxgJ3xpT5xolxBfqKAPXL74EkeIuKaSQypuEiuJonSRRsTHr_Z-fiT5cM31xKbwQ7ow9GbW08gHnP2fue7xyK1zlIEwqnxN3RhFEpjdcKEGJ1EEsSAl5lHA21uTtZMxfwROmTIoX9781&amp;t=ffffffff999c3159" type="text/javascript"></script>
+            <script type="text/javascript">
+                //<![CDATA[
+                if (typeof (Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+                //]]>
+            </script>
+
+            <script src="services/ws.asmx/jsdebug" type="text/javascript"></script>
+            <script src="services/ErrorRecorder.asmx/jsdebug" type="text/javascript"></script>
+            <script src="../CoBrand/Services/MainMenuServices.asmx/jsdebug" type="text/javascript"></script>
+            <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="21D2EAA9" />
+            <input name="ctl00$strbrand" type="hidden" id="ctl00_strbrand" />
+
+
+            <div id="ctl00_cphBody_divMM">
+                <table cellSpacing="0" cellPadding="0" width="800" border="0" style="margin: 0 auto;">
+                    <tr>
+                        <td width="360">
+                            <div class="MainMenuHeaders">
+                                OPEN LOADS
+                            </div><table width="100%" cellpadding="3" border="0">
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_anim.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=QTND"><B>Quote Needed</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="QuoteNeededCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="QuoteNeeded"><b>1</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td width="40"> </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=QTD"><B>Quoted</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="QuotedCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="Quoted"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td width="40"> </td>
+                                </tr>
+                            </table><br />
+                        </td>
+                        <td width="63" />
+                        <td width="360">
+                            <div class="MainMenuHeaders">
+                                LOAD ISSUES
+                            </div><table width="100%" cellpadding="3" border="0">
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/dollar_sign_gray.gif" width="15" title="Accounting Issues" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=ACCT"><B>Accounting Issues</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="AccountingIssuesCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="AccountingIssues"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td width="40" rowspan="2"> </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_x_gray.gif" width="15" title="Freight Claims" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CLMS"><B>Claims</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="ClaimsCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="Claims"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table><br /><br /><div class="MainMenuHeaders">
+                                QUOTE HISTORY
+                            </div><table width="100%" cellpadding="3" border="0">
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=DLVRD"><B>View Delivered Loads</B></a>
+                                    </td>
+                                    <td width="60" />
+                                    <td width="40" />
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?advSearch=true&searchtype=Carrier"><B>Search Loads</B></a>
+                                    </td>
+                                    <td width="60" />
+                                    <td width="40" />
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="../auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="../Reports/Load_Report_2.aspx?ReportName=CARRIERINVOICE"><B>Invoice Status Report</B></a>
+                                    </td>
+                                    <td width="60" />
+                                    <td width="40" />
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="../auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrieradjustment"><B>Adjustment Requests</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="QuoteNeededCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="AdjustmentRequests"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td width="40" />
+                                </tr>
+                            </table><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="360">
+                            <div class="MainMenuHeaders">
+                                AWARDED QUOTES
+                            </div><table width="360" cellpadding="3" border="0">
+                                <tr><td width="20" style="height:5px"> </td><td colspan="3" style="height:5px"><font style="font-family:verdana;font-size:8pt;color:black;font-weight:bold">DISPATCH</font></td><td width="40" rowspan="9"> </td></tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CRDPTCH"><B>Carrier Dispatch</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="CarrierDispatchCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="CarrierDispatch"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CLDPTCH"><B>Client Dispatch</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="ClientDispatchCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="ClientDispatch"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr><td width="20" style="height:5px"> </td><td colspan="3" style="height:5px"><font style="font-family:verdana;font-size:8pt;color:black;font-weight:bold">PICKUP</font></td></tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CRPCKUP"><B>Carrier Pickup</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="CarrierPickupCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="CarrierPickup"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CLPCKUP"><B>Client Pickup</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="ClientPickupCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="ClientPickup"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr><td width="20" style="height:5px"> </td><td colspan="3" style="height:5px"><font style="font-family:verdana;font-size:8pt;color:black;font-weight:bold">DELIVER</font></td></tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CRDLVR"><B>Carrier Deliver</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="CarrierDeliverCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="CarrierDeliver"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CLDLVR"><B>Client Deliver</B></a>
+                                    </td>
+                                    <td width="60" align="right">
+                                        <div style="float:right;">
+                                            <div id="ClientDeliverCount" style="float:right;">
+                                                <div style="float:right;padding:2px;">
+                                                    Items
+                                                </div><div class="MenuCount" data-counttype="ClientDeliver"><b>0</b></div><div class="MenuLoad">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="63" />
+                        <td>
+                            <div class="MainMenuHeaders">
+                                COVERED LOADS
+                            </div><table width="100%" cellpadding="3" border="0">
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewloads.aspx?searchtype=carrier&show=CVRD"><B>View Covered Loads</B></a>
+                                    </td>
+                                </tr>
+                            </table><br /><br /><div class="MainMenuHeaders">
+                                ACCOUNT ADMINISTRATION
+                            </div><table width="100%" cellpadding="3" border="0">
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <font style="font-family:verdana;font-size:7pt;color:lightgrey;font-weight:bold">
+                                            Edit Account Information
+                                        </font>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <a href="viewxml.aspx?type=PersonalSettings"><B>Edit Personal Settings</B></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="20"> </td>
+                                    <td colspan="2">
+                                        <img height="15" src="/Auxi/images/bullet_gold_static.gif" width="15" />
+
+                                        <font style="font-family:verdana;font-size:7pt;color:lightgrey;font-weight:bold">
+                                            Edit Email Duties
+                                        </font>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </form>
+    </div>
+
+    <footer class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <p class="text-center">
+                    Copyright &copy; 2019 Banyan Technology<br />
+                    <i class="fa fa-phone-square"></i>&nbsp;<a href="tel:1.800.835.1274">1.800.835.1274</a>  |  <i class="fa fa-envelope-o"></i>&nbsp;<a href="mailto:CustomerService@BanyanTechnology.com">CustomerService@BanyanTechnology.com</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    <div id="dLoading">
+        <div id="dLoadingText">
+            Please wait while we retrieve your information...
+        </div>
+        <img src="/Auxi/images/Loaders/progressBar.gif" alt="progress bar image" />
+    </div>
+
+    <script type="text/javascript" src="/Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/Auxi/scripts/cobrand/banyan.changeclient.js?19.3.20.09"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#change-client").click(function () {
+                var chcl = new banyan.ChangeClient();
+                chcl.showUserDialog();
+            });
+
+            //delete when jqueryui is removed
+            $.fn.bootstrapBtn = $.fn.button.noConflict();
+            //var bsModal = $.fn.modal.noConflict();
+
+            //delete when bootstrap is added
+            $("body").css("margin-bottom", $("footer").outerHeight() + 10);
+        });
+        function SubmitPage(page, s, f) {
+            if (f !== '') {
+                f = "status=%27" + f + "%27";
+            }
+
+            var url = page + "?show=" + s + "&filter=" + f + "&showAggregate=" + $('#ckShowAggregate').prop('checked');
+            window.open(url, '_self');
+        }
+    </script>
+
+
+    <style>
+        #developer-tools {
+            width: 675px;
+            height: 90%;
+        }
+    </style>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-74463204-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+    <script type="text/javascript" src="https://secure.leadforensics.com/js/91960.js"></script>
+    <noscript><img src="https://secure.leadforensics.com/91960.png" style="display:none;" /></noscript>
+
+</body>
+</html>

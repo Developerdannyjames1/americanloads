@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="2298ceb6-67a6-4239-b7d8-4bcbb79972d4" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://cnx.test.dat.com:9280/wsdl/TfmiFreightMatching.wsdl" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="TcoreCarrierWatchTypes.xsd" MetadataType="Schema" ID="a849ae24-9cc6-4067-87e0-ddcd235970a4" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TcoreCarrierWatchTypes.xsd" />
+    <MetadataFile FileName="TfmiFreightMatching.xsd" MetadataType="Schema" ID="2ca578b1-439e-4dec-9e2a-b2d604f6dc04" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TfmiFreightMatching.xsd" />
+    <MetadataFile FileName="TfmiFreightMatching.wsdl" MetadataType="Wsdl" ID="451528d2-7077-4dbf-b933-4f2eba634e50" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TfmiFreightMatching.wsdl" />
+    <MetadataFile FileName="TcoreCarrierWatch2.xsd" MetadataType="Schema" ID="5095e26c-1d17-473b-8d83-9d6e7c1f9f2c" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TcoreCarrierWatch2.xsd" />
+    <MetadataFile FileName="TfmiRates.xsd" MetadataType="Schema" ID="58bce9bf-be15-4764-accc-884397a25427" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TfmiRates.xsd" />
+    <MetadataFile FileName="TcoreHeaders.xsd" MetadataType="Schema" ID="40df9817-7e91-498f-945d-a42decf7f757" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TcoreHeaders.xsd" />
+    <MetadataFile FileName="TcoreTypes.xsd" MetadataType="Schema" ID="fa46da0a-e8b0-4851-9c3d-b2f0f08cff82" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TcoreTypes.xsd" />
+    <MetadataFile FileName="soap-envelope.xsd" MetadataType="Schema" ID="fe06a877-6d78-4e31-a1bf-b75f904740aa" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/soap-envelope.xsd" />
+    <MetadataFile FileName="TcoreDobTypes.xsd" MetadataType="Schema" ID="a1ef785b-3ab5-45f0-a5cd-9b5660e6ac6a" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TcoreDobTypes.xsd" />
+    <MetadataFile FileName="TcoreMessage.xsd" MetadataType="Schema" ID="ae91d562-946b-46c6-b5c3-d67a03760e7f" SourceId="1" SourceUrl="http://cnx.test.dat.com:9280/wsdl/TcoreMessage.xsd" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

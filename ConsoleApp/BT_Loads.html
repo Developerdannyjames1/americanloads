@@ -1,0 +1,627 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>Banyan Technology - Freight Management System</title>
+    <link href="/Auxi/styles/Custom.css?4IEQW-GyYdNsj39TncNM_Z9SNjzw2HR2fESmOxoKi9M1" rel="stylesheet" />
+    <link href="/Auxi/styles/WebDispatch.css?SlUyoxF8ajqeJF_b-VBGRN0fbDrA9wKIyE0zRiZI1Uc1" rel="stylesheet" />
+    <link href="/Auxi/styles/jquery-ui.css?eYc2c666p_Nu5uy83nmbYV4LoTFzNJJ4BHdi0j8KhnY1" rel="stylesheet" />
+    <link href="/static/css/jquery.jgrowl.css?sP5IArvj0Tss-HgK7-I2Sk_HGYqR3zjrB5CBr09SZ5g1" rel="stylesheet" />
+    <link href="/Auxi/styles/jquery.fancybox.min.css?uR2U2LfOIFvrP-73bsBKZY0rOwcT9gKGf45FrwUL5Xc1" rel="stylesheet" />
+    <link href="/Auxi/styles/pagetracker.css?hzNVH8vVASgiGHLWUF-3dxX-wYwN_0A2H3ZT7A8Y9e01" rel="stylesheet" />
+    <link href="/Auxi/styles/BanyanTechnology.css?9DAMeZg-GviY-lufCFmdVrkl3Oz4Jiy449Q0P_Zi4MY1" rel="stylesheet" />
+    <link href="/Auxi/styles/font-awesome.min.css?eZrrJcwDc_3uDhsdt61sL2oOBY362qM3lon1gyExkL01" rel="stylesheet" />
+    <link href="/Auxi/styles/poopstrap.css?6QEJCewpRO2QhXK_tJ5lpOEiRT6oiOGCkIwlT2EjCho1" rel="stylesheet" />
+
+    <link href="/auxi/Styles/print.css" rel="stylesheet" />
+
+    <style id="CustomStyle" type="text/css">
+        .MainMenuHeaders {
+            background-color: #0060A9
+        }
+
+        .MainMenuHeaders {
+            color: #fff
+        }
+
+        .EZRateMenuHeaders {
+            background-color: #0060A9
+        }
+
+        .EZRateMenuHeaders {
+            color: #fff
+        }
+
+        .EZRateSubMenuHeaders {
+            background-color: #b0c4de
+        }
+
+        .EZRateSubMenuHeaders {
+            color: #000000
+        }
+
+        .EZRateSubMenuHeaders {
+            font-weight: bold
+        }
+
+        .RatesSubTableHeader {
+            font-size: 6pt
+        }
+
+        .ProductSubTableHeader {
+            font-size: 7pt
+        }
+
+        .panel-default > .panel-heading {
+            color: #fff;
+            background-color: #0060A9;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+        var ajax_loader_src = "/static/img/ajax-loader.gif";
+    </script>
+
+    <script src="/Auxi/scripts/app/banyan.globals.js?FsRLrFGQWrwJpG4JU7Tjnw2BRpbR3Fp4ZRaXve7eE0Q1"></script>
+    <script src="/scripts/jquery-1.12.4.min.js?ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ-Xp8a4MxAQ1"></script>
+    <script src="/scripts/jquery-migrate-1.2.1.min.js?s_ML5_ElSq1_4VAuLLPKJ3UQZm-aqeTDqB1VI3xW1GA1"></script>
+    <script src="/scripts/moment.js?j0xFVWCDJkYQTK9hG2ZRfenaNKYV8X3bang_XsE8_cU1"></script>
+    <script src="/scripts/jquery-ui-1.11.1.min.js?T3W1MnJa3O9e-1OBF0g91W_qMHsxPJQmhBFSc1x251U1"></script>
+    <script src="/scripts/jquery.fancybox.js?lGYI9J-diJJWwLLMD35V79cLhrxo7MYzNQImKJntuL01"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/resize.min.js?X0HkvAmPwadmZGvMUi2I7__U3F8YwQrHekpcQS-6g3w1"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/jquery.json-2.2.min.js?F0mcOqHBzO3myLHiGxmj3QG1GMz9HGMgXU-dw27cBg81"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/hashchange.min.js?-DUl8W_4Nf5XWL5vUx7NXk79zkZfWTXeBE8WJajQ17M1"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/block-ui.min.js?o0eEhkepDTpap7GquhJPdT2e5wHcgPkmrpM7eJ-rr_w1"></script>
+    <script src="/Auxi/scripts/general/jquery/plugins/jquery.timers-1.2.mod.js?Sm3KoTk-PI7IYpNtgDTCaOcUQ-QBMMZjmdkFHpJd2Iw1"></script>
+    <script src="/Auxi/scripts/general/Common.js?SIcfH33Ik-2KGnlrjSKJ5OPj-CgkL03w3riSBQcvGrM1"></script>
+    <script src="/Auxi/scripts/general/PanelEdit.js?RKGq3ncm60OFg-eczXHaphVnuWw1zvtElQFdfc9j4fw1"></script>
+    <script src="/Auxi/scripts/general/err.js?09ozq6xwmgpdsWJaNtScOVvmTEpS94Q1b_3lR5cQoXo1"></script>
+    <script src="/Auxi/scripts/cobrand/Validation.js?Ofv06scbz9L9RrBXCCrRIQ_Hs9T8D5t5gCC3nOeDsoI1"></script>
+    <script src="/Auxi/scripts/general/helpers/String.js?gKjpoDtudPGqFUVyCjEcX5uXSLyRvkikoVT6ui7GAFU1"></script>
+    <script src="/Auxi/scripts/general/helpers/Alert.js?hahJ7ra2dHeON0myhZ9zBUJSOZKLuR6wEUuwbPGJ51g1"></script>
+    <script src="/static/js/jquery.jgrowl.js?BjnMNnvo_ytkLO5bn768tFAaxKMz_o3mlOmB90jwOSs1"></script>
+    <script src="/Auxi/scripts/general/q/q.min.js?juhQ_mLlvPUolA1WtAsWe_30rDey-GJMbw90h2whbPU1"></script>
+    <script src="/Auxi/scripts/app/banyan.ajax.js?CjTz0NrSoHLWVglqZoipK_jpGVb5p4qgyEdKWsAVSoQ1"></script>
+    <script src="/Auxi/scripts/general/helpers/banyan.helper.paging.js?Uye3TdDqikZnYvNBmM4bX-0qdAhPsmFxSbSbaCQxAgA1"></script>
+    <script src="/Auxi/scripts/general/wait-time.js?6BgGciryqGvdfaDDd4G7o40lwixTLuT2X_7qRWhK31w1"></script>
+
+</head>
+<body id="ctl00_bdy">
+    <div class="liveDispatch-bar"></div>
+    <div class="enviroment-bar"></div>
+    <div id="wrapper">
+        <div id="ctl00_new_menu">
+            <div class="row"><div class="col-xs-12 text-center"><a href=""><img class="img-responsive center-block" src="/Auxi/images/CoBrand/MainHeaderRevised.gif" style="max-height: 160px;"></img></a></div></div>
+
+            <div class="container-fluid">
+                <div class="row banyan-main-menu">
+                    <nav class="navbar navbar-default" style="border-radius:0;">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#banyan-main-menu" aria-expanded="false">
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="/cobrand/MainMenu.aspx"><i class="fa fa-home fa-fw"></i></a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="banyan-main-menu">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/cobrand/mainmenu.aspx?section=carrier_openloads">Open Loads</a></li>
+                                <li><a href="/cobrand/mainmenu.aspx?section=Carrier_AwardedQuotes">Awarded Quotes</a></li>
+                                <li><a href="/cobrand/mainmenu.aspx?section=carrier_loadissues">Load Issues</a></li>
+                                <li><a href="/cobrand/viewloads.aspx?searchtype=carrier&amp;show=DLVRD">Quote History</a></li>
+                                <li><a href="/cobrand/viewloads.aspx?searchtype=carrier&amp;show=CVRD">Covered Loads</a></li>
+                                <li><a href="/cobrand/viewloads.aspx?advSearch=true&amp;searchType=Carrier">Search Loads</a></li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i><i class="fa fa-caret-down fa-fw"></i></a>
+                                    <ul class="dropdown-menu">
+
+                                        <li><a href="/UserSettings/EditUserSettings">Edit User Settings</a></li>
+
+                                        <li role="separator" class="divider"></li>
+
+
+
+                                        <li><a href="/MasterPage/LogOut">Log Out</a></li>
+                                    </ul>
+
+                                </li>
+                            </ul>
+
+                        </div>
+                    </nav>
+                </div>
+
+                <div id="drawer" class="row banyan-main-menu">
+                    <div class="panel panel-default">
+                        <div class="panel-body" id="subMenuContent">
+                            <div class="row submenu-row">
+                                <div class="col-xs-3 submenu-user">
+                                    <span><em>Welcome,</em> <a href="/UserSettings/EditUserSettings">DA</a></span>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <strong class="submenu-carrier-name" title="American Specialized Transport, Inc.">American Specialized Transport, Inc.</strong>
+                                    <a href="javascript:" class="various btn btn-xs btn-default" id="change-client" data-src="/ChangeClient/WriteChangeUserClient2">Change Client</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+
+
+        <form method="post" action="./viewloads.aspx?searchtype=carrier&amp;show=QTND" id="aspnetForm">
+            <div class="aspNetHidden">
+                <input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+                <input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+                <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="I/Vy+8/VXihvbkwFirk5Dwy167Qe1v4bGqr8fS2SsNALkAkDDcHNuvpyOEVmzoouCCYvNgCNshD1Asixztuf5oKj3iszis9ouIRuXkRCNdPiiC2zgqlrrHnlutGzayJYITVJw+KnYF8hygAZNujD/owpIFXuY7ZLmpWvobF47YpgB7qcPJ7DqiNMZAwAlMvH" />
+            </div>
+
+            <script type="text/javascript">
+                //<![CDATA[
+                var theForm = document.forms['aspnetForm'];
+                if (!theForm) {
+                    theForm = document.aspnetForm;
+                }
+                function __doPostBack(eventTarget, eventArgument) {
+                    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+                        theForm.__EVENTTARGET.value = eventTarget;
+                        theForm.__EVENTARGUMENT.value = eventArgument;
+                        theForm.submit();
+                    }
+                }
+                //]]>
+            </script>
+
+
+            <script src="/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZEzuYCZSnQuUmlyboaOuB9zvVJ4rnky1MZPCoA6lfcJ_jQCSY2SuRUId_EBswT-JYA2&amp;t=636765320300000000" type="text/javascript"></script>
+
+
+            <script type="text/javascript">
+                //<![CDATA[
+                $('#change-client').attr('href', '#').removeClass('various');//]]>
+            </script>
+
+            <script src="/ScriptResource.axd?d=D9drwtSJ4hBA6O8UhT6CQmNTcSY3XdRfZA2rTNrukA_oaz3uq5e_uRS3T-694s5pq1Pd46TPm_emLy5wpTyWl3OPk0lg_lFEsAqSu7kmAUKvgHcwr-GkugMgdhzauV5bAmXyh9JTM6xMAfTFlKGssjkLw2nsCMGQD4oyRpMtEjg1&amp;t=ffffffff999c3159" type="text/javascript"></script>
+            <script type="text/javascript">
+                //<![CDATA[
+                if (typeof (Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+                //]]>
+            </script>
+
+            <script src="/ScriptResource.axd?d=JnUc-DEDOM5KzzVKtsL1tfSQhMCumRepYWH4_e9fkTWc-u6WdbBx6wz8eIEIQuuyP_gdGhndDM_PKdQ8cENc2h2LTpZlbWPsI-BZJfqGaI01E5zs_qaaFetiwAleJGASpHlRiQa4vxO2CYMIA-i0YFti7R86JPa53mr0cOF_h2Z0fu2NwYtc4nhM74FlnB1w0&amp;t=ffffffff999c3159" type="text/javascript"></script>
+            <script src="../cobrand/services/ws.asmx/jsdebug" type="text/javascript"></script>
+            <script src="../cobrand/services/viewloads.asmx/jsdebug" type="text/javascript"></script>
+            <script src="../cobrand/services/Archive.asmx/jsdebug" type="text/javascript"></script>
+            <div class="aspNetHidden">
+
+                <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="DFA17DF9" />
+            </div>
+            <input name="ctl00$strbrand" type="hidden" id="ctl00_strbrand" />
+
+
+            <script type="text/javascript">
+                //<![CDATA[
+                Sys.WebForms.PageRequestManager._initialize('ctl00$cphBody$ScriptManager1', 'aspnetForm', [], [], [], 90, 'ctl00');
+                //]]>
+            </script>
+
+            <style type="text/css">
+                div#divAdvSearch {
+                    display: none;
+                }
+            </style>
+            <input name="ctl00$cphBody$hSearchType" type="hidden" id="ctl00_cphBody_hSearchType" value="CARRIER" />
+            <input name="ctl00$cphBody$hShowIssues" type="hidden" id="ctl00_cphBody_hShowIssues" value="true" />
+            <input name="ctl00$cphBody$hMaxRecords" type="hidden" id="ctl00_cphBody_hMaxRecords" value="25" />
+            <input name="ctl00$cphBody$hShow" type="hidden" id="ctl00_cphBody_hShow" value="QTND" />
+            <input name="ctl00$cphBody$hSortBy" type="hidden" id="ctl00_cphBody_hSortBy" />
+            <input name="ctl00$cphBody$hSortDirection" type="hidden" id="ctl00_cphBody_hSortDirection" />
+            <input name="ctl00$cphBody$hFilter" type="hidden" id="ctl00_cphBody_hFilter" />
+            <input name="ctl00$cphBody$hShowAggregate" type="hidden" id="ctl00_cphBody_hShowAggregate" value="False" />
+            <br />
+            <!-- Advanced Search -->
+            <div id="lblMessage" class="ErrorMsg">
+            </div>
+            <div id="ctl00_cphBody_Div1" style="width: 100%;" onkeydown="javascript:if(event.keyCode==13) {AdvancedSearch(); return false;}">
+                <div id="dCalender" style="display: none; position: absolute;">
+                </div>
+                <table cellspacing="1" cellpadding="0" style="background: #000; width: 100%; border: none">
+                    <tr style="background: #B0C4DE">
+                        <td>
+                            <table cellspacing="0" cellpadding="2" style="background: #000; width: 100%; border: none">
+                                <tr class="EZRateSubMenuHeaders">
+                                    <td colspan="4" style="vertical-align:middle;">
+                                        <img id="imgExp" onclick="javascript:AdvSearch_Click();" src="../Auxi/images/expand_collapse/expand.jpg"
+                                             alt="Disply advanced search menu" style="width:13px;height:13px;border:none;font:bold 8pt Verdana;vertical-align:bottom;" />&nbsp;&nbsp;Advanced Search<!--&nbsp;&nbsp;<font style="color:darkgreen;font-family:Verdana;font-size:8pt;font-weight:bold;"><i>(Searches entire database)</i></font>-->
+                                    </td>
+                                    <td style="margin-right:10px;float:right;">
+                                        <input name="ctl00$cphBody$cbASViewAggregate" type="checkbox" id="ctl00_cphBody_cbASViewAggregate" onchange="javascript:ChangeViewAggregate(this);" />
+                                        <label for="cbASViewAggregate" style="line-height:20px;vertical-align:bottom;">View Aggregate</label>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div id="ctl00_cphBody_divAdvSearch">
+                                <span id="ctl00_cphBody_lblAdvSearch"></span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <!-- End Advanced Search -->
+            <br />
+            <!-- Quick Search -->
+            <!-- End Quick Search -->
+
+            <div id="pnlValidationErrors">
+                <div id="lblValidationErrors" class="ErrorMsg">
+                </div>
+            </div>
+
+            <span id="ctl00_cphBody_lblGrid">
+                <style type="text/css">
+                    .Ellipsis {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                </style><br /><div style="width:100%;">
+                    <br /><table width="100%" cellpadding="0" cellspacing="1">
+                        <tr>
+                            <td class="v10" nowrap="">
+                                <b>
+                                    Showing Page 1 of 1
+                                </b>
+                            </td>
+                            <td align="right"><b /></td>
+                        </tr>
+                    </table><br /><table width="100%" border="0" cellpadding="0" cellspacing="1" bgcolor="black">
+                        <tr>
+                            <td>
+                                <table width="100%" border="0" cellpadding="4" cellspacing="1" bgcolor="black">
+                                    <tr>
+                                        <td bgcolor="Sienna" align="center" class="viewloadgrid">
+                                            Action
+                                        </td>
+                                        <td bgcolor="Sienna" />
+                                        <td bgcolor="#996600" align="center" style="width:60px;"><a href="javascript:Sort('name');"><font class="viewloadgrid">Client</font></a></td>
+                                        <td bgcolor="#996600" align="center" style="width:60px;"><a href="javascript:Sort('bolID');"><font class="viewloadgrid">BOL #</font></a></td>
+                                        <td bgcolor="#996600" align="center" style="width:60px;"><a href="javascript:Sort('manifestID');"><font class="viewloadgrid">PRO #</font></a></td>
+                                        <td bgcolor="#996600" align="center" style="width:60px;"><a href="javascript:Sort('billingID');"><font class="viewloadgrid">Billing ID</font></a></td>
+                                        <td bgcolor="#660000" style="width:80px;"><a href="javascript:Sort('shipperstate');"><font class="viewloadgrid">Origin</font></a></td>
+                                        <td bgcolor="#660000" style="width:80px;"><a href="javascript:Sort('consigneestate');"><font class="viewloadgrid">Dest.</font></a></td>
+                                        <td bgcolor="#660000" align="center" style="width:60px;"><a href="javascript:Sort('shipperdatetime');"><font class="viewloadgrid">Pickup</font></a></td>
+                                        <td bgcolor="#660000" align="center" style="width:60px;"><a href="javascript:Sort('consigneedatetime');"><font class="viewloadgrid">Deliver</font></a></td>
+                                        <td bgcolor="#464E81" align="center" style="width:40px;"><a href="javascript:Sort('weighttotal');"><font class="viewloadgrid">Wt.</font></a></td>
+                                        <td bgcolor="#464E81" align="center" style="width:60px;"><a href="javascript:Sort('shippingquantity');"><font class="viewloadgrid">Qty</font></a></td>
+                                        <td bgcolor="#b0c4de" align="center" style="width:60px;"><a href="javascript:Sort('status');"><font class="viewloadgrid">Status</font></a></td>
+                                        <td bgcolor="#b0c4de" align="center" style="width:60px;"><a href="javascript:Sort('HasInvoice');"><font class="viewloadgrid">Invoiced</font></a></td>
+                                    </tr>
+                                    <tr class="c1">
+                                        <td align="center"><a href="extendedload.aspx?LoadID=23497772" target="_self">View</a></td>
+                                        <td>FTL</td>
+                                        <td align="left">Rain For Rent 1025 - Arlington</td>
+                                        <td align="left" style="width:100%" title="1025190027">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1025190027
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;">
+                                            37394
+                                        </td>
+                                        <td align="left">Summerville<br />SC, 29483</td>
+                                        <td align="left">Arlington<br />TX, 76001</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="center">4/1/2019<br />12:00 AM</td>
+                                        <td align="right">10001</td>
+                                        <td align="right">25 Feet</td>
+                                        <td align="center">Quoted</td>
+                                        <td align="center" />
+                                    </tr>
+                                    <tr class="c0">
+                                        <td align="center"><a href="extendedload.aspx?LoadID=23495586" target="_self">View</a></td>
+                                        <td>FTL</td>
+                                        <td align="left">Rain For Rent 1096 - Nampa</td>
+                                        <td align="left" style="width:100%" title="1096190015">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1096190015
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;">
+                                            Ewing
+                                        </td>
+                                        <td align="left">Bakersfield<br />CA, 93308</td>
+                                        <td align="left">Meridian<br />ID, 83642</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="center">4/1/2019<br />12:00 AM</td>
+                                        <td align="right">3</td>
+                                        <td align="right">1 Truckload</td>
+                                        <td align="center">Quoted</td>
+                                        <td align="center" />
+                                    </tr>
+                                    <tr class="c1">
+                                        <td align="center"><a href="multistop.aspx?LoadID=23494899" target="_self">View</a></td>
+                                        <td>
+                                            Multi.
+                                        </td>
+                                        <td align="left">Rain For Rent 1088 - Tucson</td>
+                                        <td align="left" style="width:100%" title="1088190003">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1088190003
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;"></td>
+                                        <td align="left">Sparks<br />NV, 89431</td>
+                                        <td align="left">Tucson<br />AZ, 85706</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="right"></td>
+                                        <td align="right">2 Units</td>
+                                        <td align="center">Open</td>
+                                        <td align="center" />
+                                    </tr>
+                                    <tr class="c0">
+                                        <td align="center"><a href="extendedload.aspx?LoadID=23449836" target="_self">View</a></td>
+                                        <td>DRIVEAWAY</td>
+                                        <td align="left">Rain For Rent 1057 - Yuma</td>
+                                        <td align="left" style="width:100%" title="1057190055">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1057190055
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;">
+                                            1066522
+                                        </td>
+                                        <td align="left">Bakersfield<br />CA, 93308</td>
+                                        <td align="left">Somerton<br />AZ, 85350</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="center">3/30/2019<br />12:00 AM</td>
+                                        <td align="right">1</td>
+                                        <td align="right">1 Trailers</td>
+                                        <td align="center">Open</td>
+                                        <td align="center" />
+                                    </tr>
+                                    <tr class="c1">
+                                        <td align="center"><a href="extendedload.aspx?LoadID=23443104" target="_self">View</a></td>
+                                        <td>FTL</td>
+                                        <td align="left">Rain For Rent 1057 - Yuma</td>
+                                        <td align="left" style="width:100%" title="1057190052">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1057190052
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;">
+                                            1066522
+                                        </td>
+                                        <td align="left">Rifle<br />CO, 81650</td>
+                                        <td align="left">Somerton<br />AZ, 85350</td>
+                                        <td align="center">3/27/2019<br />12:00 AM</td>
+                                        <td align="center">3/28/2019<br />12:00 AM</td>
+                                        <td align="right">2</td>
+                                        <td align="right">1 Truckload</td>
+                                        <td align="center">Quoted</td>
+                                        <td align="center" />
+                                    </tr>
+                                    <tr class="c0">
+                                        <td align="center"><a href="extendedload.aspx?LoadID=23376068" target="_self">View</a></td>
+                                        <td>PTL</td>
+                                        <td align="left">Rain For Rent 1072 - Minot</td>
+                                        <td align="left" style="width:100%" title="1072190015">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1072190015
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;"></td>
+                                        <td align="left">Cortez<br />CO, 81321</td>
+                                        <td align="left">Minot<br />ND, 58701</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="center">4/12/2019<br />12:00 AM</td>
+                                        <td align="right">9950</td>
+                                        <td align="right">16 Feet</td>
+                                        <td align="center">Open</td>
+                                        <td align="center" />
+                                    </tr>
+                                    <tr class="c1">
+                                        <td align="center"><a href="extendedload.aspx?LoadID=23285652" target="_self">View</a></td>
+                                        <td>DRIVEAWAY</td>
+                                        <td align="left">Rain For Rent 1003 - Calgary</td>
+                                        <td align="left" style="width:100%" title="1003190013">
+                                            <div class="Ellipsis" style="width:150px;">
+                                                1003190013
+                                            </div>
+                                        </td>
+                                        <td align="left" style="width:100%" title="">
+                                            <div class="Ellipsis" style="width:150px;">
+                                            </div>
+                                        </td>
+                                        <td align="left" style="white-space:nowrap;">
+                                            BBE Hydro
+                                        </td>
+                                        <td align="left">Thompson<br />MB, R8N0A1</td>
+                                        <td align="left">Idaho Falls<br />ID, 83401</td>
+                                        <td align="center">3/20/2019<br />12:00 AM</td>
+                                        <td align="center">3/29/2019<br />12:00 AM</td>
+                                        <td align="right">1</td>
+                                        <td align="right">1 Trailers</td>
+                                        <td align="center">Open</td>
+                                        <td align="center" />
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table><br /><table width="100%" cellpadding="0" cellspacing="1">
+                        <tr>
+                            <td class="v10" nowrap="">
+                                <b>
+                                    Showing Page 1 of 1
+                                </b>
+                            </td>
+                            <td align="right"><b /></td>
+                        </tr>
+                    </table><br />
+                </div>
+            </span>
+
+            <div id="dPopup" style="display: none; border-style: solid; border-width: 1px; border-color: black;
+        width: 306px;">
+                <table class="ForegroundTable" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="EZRateMenuHeaders">
+                            <span id="lblPopupHeader"></span>
+                        </td>
+                        <td class="EZRateMenuHeaders" align="right">
+                            <input type="button" value="Close" onclick="HideEditPanel(null,null,null,'dPopup',true);" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="padding: 3px;">
+                            <div id="dPopupInner">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <script src="/Auxi/scripts/cobrand/jsCalender.js?19.3.27.01"></script>
+            <script src="/Auxi/scripts/general/helpers/String.js?19.3.27.01"></script>
+            <script src="/Auxi/scripts/cobrand/ViewLoads.js?19.3.27.01"></script>
+            <script src="/Auxi/scripts/cobrand/Tracking.js?19.3.27.01"></script>
+            <script src="/Auxi/scripts/general/zip.js?19.3.27.01"></script>
+
+
+            <script type="text/javascript">
+
+
+                function KeyHandler(e) {
+                    if (e.keyCode == 13) {
+                        QuickSearch();
+                        e.returnValue = false;
+                        return false;
+                    }
+                }
+
+                var MaxTimeMin = 122;
+                var TimeOutMin = MaxTimeMin;
+                var RefreshTimeMS = 60000;
+                window.onload = UpdateStatusBar;
+                ValidationDiv = 'lblMessage';
+                function UpdateStatusBar(mouseOver) {
+                    if (mouseOver == true) {
+                        window.status = "You will be logged out in: " + TimeOutMin + " minutes";
+                        return;
+                    }
+                    else {
+                        window.status = "You will be logged out in: " + TimeOutMin + " minutes";
+                        TimeOutMin -= 1;
+
+                        if (TimeOutMin == 0) {
+                            var cobrand = $('#ctl00_strbrand').val();
+                            cobrand = typeof cobrand !== 'string' ? 'BanyanTechnology' : cobrand;
+                            location.replace("../index.aspx?strBrand=" + $('#ctl00_strbrand').val());
+                        }
+                        else
+                            setTimeout("javascript:UpdateStatusBar();", RefreshTimeMS);
+                    }
+                }
+            </script>
+
+
+
+        </form>
+    </div>
+
+    <footer class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <p class="text-center">
+                    Copyright &copy; 2019 Banyan Technology<br />
+                    <i class="fa fa-phone-square"></i>&nbsp;<a href="tel:1.800.835.1274">1.800.835.1274</a>  |  <i class="fa fa-envelope-o"></i>&nbsp;<a href="mailto:CustomerService@BanyanTechnology.com">CustomerService@BanyanTechnology.com</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    <div id="dLoading">
+        <div id="dLoadingText">
+            Please wait while we retrieve your information...
+        </div>
+        <img src="/Auxi/images/Loaders/progressBar.gif" alt="progress bar image" />
+    </div>
+
+    <script type="text/javascript" src="/Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/Auxi/scripts/cobrand/banyan.changeclient.js?19.3.27.01"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#change-client").click(function () {
+                var chcl = new banyan.ChangeClient();
+                chcl.showUserDialog();
+            });
+
+            //delete when jqueryui is removed
+            $.fn.bootstrapBtn = $.fn.button.noConflict();
+            //var bsModal = $.fn.modal.noConflict();
+
+            //delete when bootstrap is added
+            $("body").css("margin-bottom", $("footer").outerHeight() + 10);
+        });
+        function SubmitPage(page, s, f) {
+            if (f !== '') {
+                f = "status=%27" + f + "%27";
+            }
+
+            var url = page + "?show=" + s + "&filter=" + f + "&showAggregate=" + $('#ckShowAggregate').prop('checked');
+            window.open(url, '_self');
+        }
+    </script>
+
+
+    <style>
+        #developer-tools {
+            width: 675px;
+            height: 90%;
+        }
+    </style>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-74463204-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+    <script type="text/javascript" src="https://secure.leadforensics.com/js/91960.js"></script>
+    <noscript><img src="https://secure.leadforensics.com/91960.png" style="display:none;" /></noscript>
+
+</body>
+</html>

@@ -1,0 +1,1 @@
+ALTER TABLE Loads ADD Description nvarchar(max)

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="369c7b63-0a7c-4f88-90c4-76db69dc14ef" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:8080/V13/Posting/LoadPosting.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="LoadPosting.disco" MetadataType="Disco" ID="15041152-dedb-4874-87b9-c30686ca7462" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?disco" />
+    <MetadataFile FileName="LoadPosting.wsdl" MetadataType="Wsdl" ID="db1b6783-e03f-4e1c-9c99-1ab79db1ccb8" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?wsdl=wsdl1" />
+    <MetadataFile FileName="LoadPosting.xsd" MetadataType="Schema" ID="c785d82b-f2bc-4c28-a8d4-380448169141" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd6" />
+    <MetadataFile FileName="LoadPosting1.xsd" MetadataType="Schema" ID="8a86b7d9-4e33-4049-998c-715591ced44f" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd4" />
+    <MetadataFile FileName="LoadPosting2.xsd" MetadataType="Schema" ID="daf2757a-3d66-4fcc-acf9-9233ec97254f" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd5" />
+    <MetadataFile FileName="LoadPosting3.xsd" MetadataType="Schema" ID="0e49e3bd-bc80-4063-8071-732f68ee7aab" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd2" />
+    <MetadataFile FileName="LoadPosting4.xsd" MetadataType="Schema" ID="33a7fa4d-7682-4455-80b6-48cc7de37c51" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd3" />
+    <MetadataFile FileName="LoadPosting1.wsdl" MetadataType="Wsdl" ID="eb4c4d7c-c78a-4cbc-9702-e0f8c83b3241" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?wsdl=wsdl0" />
+    <MetadataFile FileName="LoadPosting5.xsd" MetadataType="Schema" ID="7bb9673a-e97c-4a61-a92e-b6fa70ee8189" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd1" />
+    <MetadataFile FileName="LoadPosting2.wsdl" MetadataType="Wsdl" ID="cd9451a7-0136-4555-98af-cbb700f00231" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?wsdl" />
+    <MetadataFile FileName="LoadPosting6.xsd" MetadataType="Schema" ID="df754963-aab8-493b-b74d-205051c3910c" SourceId="1" SourceUrl="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd0" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

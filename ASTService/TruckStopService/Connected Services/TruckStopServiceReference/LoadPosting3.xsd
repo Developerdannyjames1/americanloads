@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/WebServices.Posting" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/WebServices.Posting" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/WebServices.Objects" />
+  <xs:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/WebServices" />
+  <xs:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd6" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:complexType name="LoadPostingRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="http://schemas.datacontract.org/2004/07/WebServices" base="q1:RequestBase">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="FullImport" type="xs:boolean" />
+          <xs:element minOccurs="0" name="Handle" nillable="true" type="xs:string" />
+          <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="Loads" nillable="true" type="q2:ArrayOfLoad" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadPostingRequest" nillable="true" type="tns:LoadPostingRequest" />
+  <xs:complexType name="LoadDeleteRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="http://schemas.datacontract.org/2004/07/WebServices" base="q3:RequestBase">
+        <xs:sequence>
+          <xs:element xmlns:q4="http://schemas.microsoft.com/2003/10/Serialization/Arrays" name="Loads" nillable="true" type="q4:ArrayOfint" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadDeleteRequest" nillable="true" type="tns:LoadDeleteRequest" />
+  <xs:complexType name="LoadListRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="http://schemas.datacontract.org/2004/07/WebServices" base="q5:RequestBase">
+        <xs:sequence />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadListRequest" nillable="true" type="tns:LoadListRequest" />
+  <xs:complexType name="LoadDeleteByLoadNumberRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q6="http://schemas.datacontract.org/2004/07/WebServices" base="q6:RequestBase">
+        <xs:sequence>
+          <xs:element xmlns:q7="http://schemas.microsoft.com/2003/10/Serialization/Arrays" name="LoadNumbers" nillable="true" type="q7:ArrayOfstring" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadDeleteByLoadNumberRequest" nillable="true" type="tns:LoadDeleteByLoadNumberRequest" />
+  <xs:complexType name="LoadViewsRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q8="http://schemas.datacontract.org/2004/07/WebServices" base="q8:RequestBase">
+        <xs:sequence>
+          <xs:element name="Load" type="xs:int" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadViewsRequest" nillable="true" type="tns:LoadViewsRequest" />
+  <xs:complexType name="LoadViewsByLoadNumberRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="http://schemas.datacontract.org/2004/07/WebServices" base="q9:RequestBase">
+        <xs:sequence>
+          <xs:element name="LoadNumber" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="LoadViewsByLoadNumberRequest" nillable="true" type="tns:LoadViewsByLoadNumberRequest" />
+</xs:schema>

@@ -1,0 +1,1057 @@
+﻿
+
+
+<script src="/MercuryGate/util/validate.js?ts=1547124520000" type="text/javascript"></script>
+<script>if (top.isNewGui) {top.AppBody = {menuLHS: window, ScratchDetail: {location: {}}};}</script>
+<script src="/MercuryGate/common/assets/js/moment/moment.js?ts=1547124518000" type="text/javascript"></script>
+<script src="/MercuryGate/common/assets/js/moment/moment-timezone.js?ts=1547124518000" type="text/javascript"></script>
+
+
+
+<head>
+<script src="/MercuryGate/common/assets/js/mgcommon.js?ts=1547124518000" type="text/javascript"></script>
+
+</head>
+<meta name="_csrf" content="4f842cd8-ef7c-4968-ad78-b3bb21340569" />
+<meta name="_csrf_header" content="X-CSRF-TOKEN" />
+<meta name="_csrf_param" content="_csrf" />
+
+
+
+<html>
+<head>
+<title>Tender Management</title>
+<STYLE type=text/css media=screen>
+    BODY { FONT:8pt Arial; }
+    A { FONT:8pt Arial; }
+    INPUT { FONT:9pt Arial; }
+    TABLE.bids { FONT:8pt Arial; BORDER-STYLE:none; WIDTH:100%; MARGIN:0px 0px 0px 0px;}
+    TD { TEXT-ALIGN:left; WHITE-SPACE:nowrap; FONT-WEIGHT:normal; }
+    .headerTD { TEXT-ALIGN:center; BACKGROUND-COLOR:#C0C0C0; FONT-WEIGHT:bold; }
+    .evenTD { TEXT-ALIGN:center; BACKGROUND-COLOR:#EDEDED; }
+    .oddTD { TEXT-ALIGN:center; BACKGROUND-COLOR:#white; }
+</STYLE>
+
+<script src="/MercuryGate/util/popup_window.js?ts=1547124520000" type="text/javascript"></script>
+
+<script>
+    
+
+    function refresh() {
+        document.location = '/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids';
+    }
+    function displayTransport(oidTransport) {
+        var url = "../transport/portletBidTransportDetail.jsp?sOid=" +oidTransport + "&bShowGL=false&bAllowUpdate=false";
+        var psWin = new PopUpWindow();
+        psWin.name("ViewTransport" + oidTransport);
+        psWin.dimensions(600, 775);
+        psWin.scrollable(false);
+        psWin.resizable(true);
+        psWin.generate(url);
+    }
+    function displayBid(oidPriceSheet) {
+        var url = "../pricesheets/viewPriceSheet.jsp?oidPriceSheet=" + oidPriceSheet + "&bEditable=false";
+        var psWin = new PopUpWindow();
+        psWin.name("PriceSheet" + oidPriceSheet);
+        psWin.dimensions(500, 650);
+        psWin.scrollable(true);
+        psWin.resizable(true);
+        psWin.generate(url);
+    }
+
+    function doBookItNow(transOid, bidOid) {
+        
+           var url = "/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sAction=BOOK_IT_NOW&sTransOid="+transOid+"&sReviewBidOid="+bidOid;
+           document.location.href = url;
+        
+    }
+
+    function addBid(transOid, bidOid, nextMax) {
+        
+           if (nextMax == null) {
+               nextMax = "9999999999.99";
+           } 
+           document.location.href = "../pricesheets/editPriceSheet.jsp?sidCarrier=(139905419170,3840,0)&sSheetType=Bid&listOwnerOids="+transOid+"&sMaxTotal="+nextMax+"&sReturnURL=%2FMercuryGate%2Ftransport%2FportletBidView.jsp%3Fnorefresh%3D%26ListCacheKey%3DportletFrameportletBidViewCarrierManageBids%26sReviewBidOid%3D"+bidOid;
+        
+    }
+
+    function removeBid(psOid) {
+        var url = "/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sAction=REMOVE_BID&sPsOid="+psOid;
+        document.location.href = url;
+    }
+
+    function updateBidTotal(transOid, bidOid, psOid, newTotal, nextMax) {
+        var bidInput = document.getElementById("totalAmount"+transOid);
+        var enforceBidLimit = document.getElementById("bEnforceBidLimit" + transOid).value;
+        if (bidInput) {
+            if (bidInput.value == "0" || bidInput.value == "0.00" || bidInput.value == "") {
+                alert("Zero or empty bids are not accepted.");
+                return;
+            }
+        }
+        if (enforceBidLimit === "true" && nextMax > 0 && newTotal > nextMax) {
+            alert('The next bid can be at most $' + nextMax + '.');
+        }
+        else {
+            var saveBtn = document.getElementById("saveBtn" + transOid);
+            if (saveBtn) {
+                saveBtn.style.visibility = "hidden";
+            }
+            var url = "/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sAction=UPDATE_BID&sTransOid=" + transOid + "&sPsOid=" + psOid + "&sNewTotal=" + newTotal + "&sReviewBidOid=" + bidOid;
+            url += "&bEnforceBidLimit" + transOid + "=" + enforceBidLimit;
+            document.location.href = url;
+        }
+    }
+</script>
+
+</head>
+<body bgcolor="white" style="margin: 0 0 0 0; padding: 0 0 0 0;">
+    <form onSubmit="return false;">  <!--  (never submit) -->
+    <table cellpadding="0" cellspacing="1" class="bids">
+        <tr>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=RESPOND_BY&bAscending=false">Respond By</a><img src="/MercuryGate/images/Expand_arrowUp.gif">
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=TRANSPORT_PRIMARY_REFERENCE&bAscending=true">Load</a>
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=ORIGIN_CITY&bAscending=true">Origin<br>City</a>
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=ORIGIN_STATE&bAscending=true">Origin<br>State</a>
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=PICKUP_DATE_EARLY&bAscending=true">Pickup Range</a>
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=DESTINATION_CITY&bAscending=true">Destination<br>City</a>
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=DESTINATION_STATE&bAscending=true">Destination<br>State</a>
+            </td>
+            <td class="headerTD">
+                <a style="font-weight: bold; color: black;" href="/MercuryGate/transport/portletBidView.jsp?norefresh=&ListCacheKey=portletFrameportletBidViewCarrierManageBids&sColumn=DROP_DATE_EARLY&bAscending=true">Delivery Range</a>
+            </td>
+            <td class="headerTD">
+                Current Bid
+            </td>
+
+            <td class="headerTD">
+                Lowest Bid
+            </td>
+
+            <td class="headerTD">
+                Book-It-Now
+            </td>
+            <td class="headerTD">
+                Number of Stops
+            </td>
+            <td class="headerTD">
+                Load Owner
+            </td>
+            <td class="headerTD">
+                Equipment
+            </td>
+            <td class="headerTD">
+                Load Planner
+            </td>
+
+        </tr>
+
+            <tr>
+                <td class="oddTD">03/20/2019 13:15 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851166460);">42661958L</a></td>
+                <td class="oddTD">PHILADELPHIA</td>
+                <td class="oddTD">PA</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">NEWPORT NEWS</td>
+                <td class="oddTD">VA</td>
+                <td class="oddTD">03/21/2019 08:00-12:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> 
+                    $ 
+                    <input type='text' size='4' id='totalAmount142851166460' name='totalAmount142851166460' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851166460,142851167763,null,document.forms[0].totalAmount142851166460.value,9999999999.99)' id='saveBtn142851166460' name='saveBtn142851166460' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Rebecca Klutz<BR>rklutz@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851166460" name="bEnforceBidLimit142851166460" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 13:15 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851230987);">42661976L</a></td>
+                <td class="evenTD">BROWNSVILLE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">JASPER</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/22/2019 08:00-12:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851230987' name='totalAmount142851230987' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851230987,142851245310,null,document.forms[0].totalAmount142851230987.value,9999999999.99)' id='saveBtn142851230987' name='saveBtn142851230987' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Rebecca Klutz<BR>rklutz@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851230987" name="bEnforceBidLimit142851230987" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 13:15 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851585955);">42662075L</a></td>
+                <td class="oddTD">NORTH CHARLESTON</td>
+                <td class="oddTD">SC</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">SELMA</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851585955' name='totalAmount142851585955' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851585955,142851589674,null,document.forms[0].totalAmount142851585955.value,9999999999.99)' id='saveBtn142851585955' name='saveBtn142851585955' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Reanna Bogle<BR>rbogle@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851585955" name="bEnforceBidLimit142851585955" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 13:15 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851137556);">42661945L</a></td>
+                <td class="evenTD">HESPERIA</td>
+                <td class="evenTD">CA</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">MIAMI</td>
+                <td class="evenTD">AZ</td>
+                <td class="evenTD">03/21/2019 08:00-10:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851137556' name='totalAmount142851137556' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851137556,142851142821,null,document.forms[0].totalAmount142851137556.value,9999999999.99)' id='saveBtn142851137556' name='saveBtn142851137556' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Rebecca Klutz<BR>rklutz@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851137556" name="bEnforceBidLimit142851137556" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 13:45 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851779720);">42662126L</a></td>
+                <td class="oddTD">BEAUMONT</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">GEISMAR</td>
+                <td class="oddTD">LA</td>
+                <td class="oddTD">03/22/2019 08:00-15:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851779720' name='totalAmount142851779720' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851779720,142851781997,null,document.forms[0].totalAmount142851779720.value,9999999999.99)' id='saveBtn142851779720' name='saveBtn142851779720' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Jessica Greene<BR>jgreene@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851779720" name="bEnforceBidLimit142851779720" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 13:45 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142852031480);">42662196L</a></td>
+                <td class="evenTD">MUSCLE SHOALS</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">EARTH CITY</td>
+                <td class="evenTD">MO</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142852031480' name='totalAmount142852031480' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142852031480,142852034124,null,document.forms[0].totalAmount142852031480.value,9999999999.99)' id='saveBtn142852031480' name='saveBtn142852031480' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Jessica Greene<BR>jgreene@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142852031480" name="bEnforceBidLimit142852031480" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 13:45 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851972638);">42662182L</a></td>
+                <td class="oddTD">WARRENSBURG</td>
+                <td class="oddTD">MO</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">LIBERAL</td>
+                <td class="oddTD">KS</td>
+                <td class="oddTD">03/22/2019 08:00-10:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851972638' name='totalAmount142851972638' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851972638,142851975589,null,document.forms[0].totalAmount142851972638.value,9999999999.99)' id='saveBtn142851972638' name='saveBtn142851972638' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Jessica Greene<BR>jgreene@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851972638" name="bEnforceBidLimit142851972638" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 13:58 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851782947);">42662127L</a></td>
+                <td class="evenTD">SPRINGFIELD</td>
+                <td class="evenTD">IL</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">SCOTT CITY</td>
+                <td class="evenTD">MO</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851782947' name='totalAmount142851782947' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851782947,142851937476,null,document.forms[0].totalAmount142851782947.value,9999999999.99)' id='saveBtn142851782947' name='saveBtn142851782947' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Jonathan Ellis<BR>jellis@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851782947" name="bEnforceBidLimit142851782947" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 14:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142849729053);">42661360L</a></td>
+                <td class="oddTD">JACKSON</td>
+                <td class="oddTD">TN</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">CORDOVA</td>
+                <td class="oddTD">TN</td>
+                <td class="oddTD">03/21/2019 08:00-12:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142849729053' name='totalAmount142849729053' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142849729053,142849733344,null,document.forms[0].totalAmount142849729053.value,9999999999.99)' id='saveBtn142849729053' name='saveBtn142849729053' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142849729053" name="bEnforceBidLimit142849729053" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 14:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142849533555);">42661263L</a></td>
+                <td class="evenTD">SHREWSBURY</td>
+                <td class="evenTD">MA</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">FOREST PARK</td>
+                <td class="evenTD">GA</td>
+                <td class="evenTD">03/22/2019 08:00-16:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142849533555' name='totalAmount142849533555' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142849533555,142849539738,null,document.forms[0].totalAmount142849533555.value,9999999999.99)' id='saveBtn142849533555' name='saveBtn142849533555' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142849533555" name="bEnforceBidLimit142849533555" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 14:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142849684891);">42661341L</a></td>
+                <td class="oddTD">MANASSAS</td>
+                <td class="oddTD">VA</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">SIMPSONVILLE</td>
+                <td class="oddTD">SC</td>
+                <td class="oddTD">03/22/2019 08:00-15:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142849684891' name='totalAmount142849684891' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142849684891,142849691425,null,document.forms[0].totalAmount142849684891.value,9999999999.99)' id='saveBtn142849684891' name='saveBtn142849684891' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142849684891" name="bEnforceBidLimit142849684891" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 14:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142849641572);">42661330L</a></td>
+                <td class="evenTD">ARTESIA</td>
+                <td class="evenTD">NM</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">BERNALILLO</td>
+                <td class="evenTD">NM</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142849641572' name='totalAmount142849641572' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142849641572,142849661875,null,document.forms[0].totalAmount142849641572.value,9999999999.99)' id='saveBtn142849641572' name='saveBtn142849641572' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142849641572" name="bEnforceBidLimit142849641572" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 14:15 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142852042673);">42662201L</a></td>
+                <td class="oddTD">PENSACOLA</td>
+                <td class="oddTD">FL</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">MIAMI</td>
+                <td class="oddTD">FL</td>
+                <td class="oddTD">03/21/2019 08:00-16:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142852042673' name='totalAmount142852042673' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142852042673,142852044711,null,document.forms[0].totalAmount142852042673.value,9999999999.99)' id='saveBtn142852042673' name='saveBtn142852042673' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Rebecca Klutz<BR>rklutz@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142852042673" name="bEnforceBidLimit142852042673" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 15:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142849029831);">42661063L</a></td>
+                <td class="evenTD">AMARILLO</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">DENVER</td>
+                <td class="evenTD">CO</td>
+                <td class="evenTD">03/21/2019 08:00-12:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142849029831' name='totalAmount142849029831' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142849029831,142849035793,null,document.forms[0].totalAmount142849029831.value,9999999999.99)' id='saveBtn142849029831' name='saveBtn142849029831' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142849029831" name="bEnforceBidLimit142849029831" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 15:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142848823939);">42661001L</a></td>
+                <td class="oddTD">BEAUMONT</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">SHREVEPORT</td>
+                <td class="oddTD">LA</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848823939' name='totalAmount142848823939' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848823939,142848829374,null,document.forms[0].totalAmount142848823939.value,9999999999.99)' id='saveBtn142848823939' name='saveBtn142848823939' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848823939" name="bEnforceBidLimit142848823939" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 15:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142848798747);">42660991L</a></td>
+                <td class="evenTD">CEDAR RAPIDS</td>
+                <td class="evenTD">IA</td>
+                <td class="evenTD">03/20/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD">GENOA</td>
+                <td class="evenTD">OH</td>
+                <td class="evenTD">03/22/2019 08:00-03/26/2019 15:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848798747' name='totalAmount142848798747' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848798747,142848806133,null,document.forms[0].totalAmount142848798747.value,9999999999.99)' id='saveBtn142848798747' name='saveBtn142848798747' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848798747" name="bEnforceBidLimit142848798747" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 15:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851799658);">42662129L</a></td>
+                <td class="oddTD">BLADENSBURG</td>
+                <td class="oddTD">MD</td>
+                <td class="oddTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="oddTD">CHARLOTTE</td>
+                <td class="oddTD">NC</td>
+                <td class="oddTD">03/26/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851799658' name='totalAmount142851799658' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851799658,142851821176,null,document.forms[0].totalAmount142851799658.value,9999999999.99)' id='saveBtn142851799658' name='saveBtn142851799658' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">3</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Reanna Bogle<BR>rbogle@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851799658" name="bEnforceBidLimit142851799658" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142850952922);">42661885L</a></td>
+                <td class="evenTD">STARKVILLE</td>
+                <td class="evenTD">MS</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">SOUTHAVEN</td>
+                <td class="evenTD">MS</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 16:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142850952922' name='totalAmount142850952922' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142850952922,142850965022,null,document.forms[0].totalAmount142850952922.value,9999999.00)' id='saveBtn142850952922' name='saveBtn142850952922' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142850952922" name="bEnforceBidLimit142850952922" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851227142);">42661974L</a></td>
+                <td class="oddTD">PITTSBURG</td>
+                <td class="oddTD">CA</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">HERMISTON</td>
+                <td class="oddTD">OR</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851227142' name='totalAmount142851227142' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851227142,142851498823,null,document.forms[0].totalAmount142851227142.value,9999999.00)' id='saveBtn142851227142' name='saveBtn142851227142' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851227142" name="bEnforceBidLimit142851227142" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142850918741);">42661873L</a></td>
+                <td class="evenTD">KRONENWETTER</td>
+                <td class="evenTD">WI</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">INDIANAPOLIS</td>
+                <td class="evenTD">IN</td>
+                <td class="evenTD">03/22/2019 08:00-12:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142850918741' name='totalAmount142850918741' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142850918741,142850974831,null,document.forms[0].totalAmount142850918741.value,9999999.00)' id='saveBtn142850918741' name='saveBtn142850918741' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142850918741" name="bEnforceBidLimit142850918741" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851283773);">42661989L</a></td>
+                <td class="oddTD">HARRISONBURG</td>
+                <td class="oddTD">VA</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">FREDERICK</td>
+                <td class="oddTD">MD</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851283773' name='totalAmount142851283773' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851283773,142851489451,null,document.forms[0].totalAmount142851283773.value,9999999.00)' id='saveBtn142851283773' name='saveBtn142851283773' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851283773" name="bEnforceBidLimit142851283773" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851852130);">42662142L</a></td>
+                <td class="evenTD">HERMANTOWN</td>
+                <td class="evenTD">MN</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">BISMARCK</td>
+                <td class="evenTD">ND</td>
+                <td class="evenTD">03/21/2019 08:00-12:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851852130' name='totalAmount142851852130' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851852130,142851860788,null,document.forms[0].totalAmount142851852130.value,9999999999.99)' id='saveBtn142851852130' name='saveBtn142851852130' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851852130" name="bEnforceBidLimit142851852130" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851441593);">42662034L</a></td>
+                <td class="oddTD">PITTSBURG</td>
+                <td class="oddTD">CA</td>
+                <td class="oddTD">03/20/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="oddTD">HERMISTON</td>
+                <td class="oddTD">OR</td>
+                <td class="oddTD">03/25/2019 08:00-03/27/2019 15:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851441593' name='totalAmount142851441593' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851441593,142851476333,null,document.forms[0].totalAmount142851441593.value,9999999.00)' id='saveBtn142851441593' name='saveBtn142851441593' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851441593" name="bEnforceBidLimit142851441593" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851213812);">42661968L</a></td>
+                <td class="evenTD">SOUTH BEND</td>
+                <td class="evenTD">IN</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">HARTFORD</td>
+                <td class="evenTD">WI</td>
+                <td class="evenTD">03/22/2019 08:00-16:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851213812' name='totalAmount142851213812' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851213812,142851507281,null,document.forms[0].totalAmount142851213812.value,9999999.00)' id='saveBtn142851213812' name='saveBtn142851213812' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851213812" name="bEnforceBidLimit142851213812" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142850866161);">42661853L</a></td>
+                <td class="oddTD">McConnellsburg</td>
+                <td class="oddTD">PA</td>
+                <td class="oddTD">04/01/2019 08:00-04/03/2019 17:00 EDT</td>
+                <td class="oddTD">BATON ROUGE</td>
+                <td class="oddTD">LA</td>
+                <td class="oddTD">04/04/2019 08:00-04/05/2019 12:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142850866161' name='totalAmount142850866161' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142850866161,142850982198,null,document.forms[0].totalAmount142850866161.value,9999999.00)' id='saveBtn142850866161' name='saveBtn142850866161' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142850866161" name="bEnforceBidLimit142850866161" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 16:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142850823694);">42661836L</a></td>
+                <td class="evenTD">REDDING</td>
+                <td class="evenTD">CA</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD">MEDFORD</td>
+                <td class="evenTD">OR</td>
+                <td class="evenTD">03/22/2019 08:00-03/25/2019 12:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142850823694' name='totalAmount142850823694' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142850823694,142850992163,null,document.forms[0].totalAmount142850823694.value,9999999.00)' id='saveBtn142850823694' name='saveBtn142850823694' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142850823694" name="bEnforceBidLimit142850823694" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851927682);">42662162L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851927682' name='totalAmount142851927682' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851927682,142852086578,null,document.forms[0].totalAmount142851927682.value,99999997952.00)' id='saveBtn142851927682' name='saveBtn142851927682' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851927682" name="bEnforceBidLimit142851927682" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142848491520);">42660872L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 07:00-03/21/2019 17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848491520' name='totalAmount142848491520' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848491520,142848541181,null,document.forms[0].totalAmount142848491520.value,999999.00)' id='saveBtn142848491520' name='saveBtn142848491520' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848491520" name="bEnforceBidLimit142848491520" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851732552);">42662113L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851732552' name='totalAmount142851732552' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851732552,142852043584,null,document.forms[0].totalAmount142851732552.value,99999997952.00)' id='saveBtn142851732552' name='saveBtn142851732552' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851732552" name="bEnforceBidLimit142851732552" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142848494495);">42660873L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 07:00-03/21/2019 17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848494495' name='totalAmount142848494495' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848494495,142848544929,null,document.forms[0].totalAmount142848494495.value,999999.00)' id='saveBtn142848494495' name='saveBtn142848494495' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848494495" name="bEnforceBidLimit142848494495" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851777186);">42662125L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851777186' name='totalAmount142851777186' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851777186,142852054698,null,document.forms[0].totalAmount142851777186.value,99999997952.00)' id='saveBtn142851777186' name='saveBtn142851777186' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851777186" name="bEnforceBidLimit142851777186" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851807403);">42662131L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851807403' name='totalAmount142851807403' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851807403,142852073729,null,document.forms[0].totalAmount142851807403.value,99999997952.00)' id='saveBtn142851807403' name='saveBtn142851807403' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851807403" name="bEnforceBidLimit142851807403" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851759178);">42662119L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851759178' name='totalAmount142851759178' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851759178,142852047597,null,document.forms[0].totalAmount142851759178.value,99999997952.00)' id='saveBtn142851759178' name='saveBtn142851759178' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851759178" name="bEnforceBidLimit142851759178" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142848497390);">42660875L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 07:00-03/21/2019 17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848497390' name='totalAmount142848497390' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848497390,142848550076,null,document.forms[0].totalAmount142848497390.value,999999.00)' id='saveBtn142848497390' name='saveBtn142848497390' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848497390" name="bEnforceBidLimit142848497390" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142848485877);">42660868L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 07:00-03/21/2019 17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848485877' name='totalAmount142848485877' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848485877,142848534331,null,document.forms[0].totalAmount142848485877.value,999999.00)' id='saveBtn142848485877' name='saveBtn142848485877' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848485877" name="bEnforceBidLimit142848485877" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142851985577);">42662185L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851985577' name='totalAmount142851985577' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851985577,142852103529,null,document.forms[0].totalAmount142851985577.value,99999997952.00)' id='saveBtn142851985577' name='saveBtn142851985577' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851985577" name="bEnforceBidLimit142851985577" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142851788693);">42662128L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142851788693' name='totalAmount142851788693' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142851788693,142852064344,null,document.forms[0].totalAmount142851788693.value,99999997952.00)' id='saveBtn142851788693' name='saveBtn142851788693' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142851788693" name="bEnforceBidLimit142851788693" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142848488615);">42660869L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 07:00-03/21/2019 17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848488615' name='totalAmount142848488615' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848488615,142848537148,null,document.forms[0].totalAmount142848488615.value,999999.00)' id='saveBtn142848488615' name='saveBtn142848488615' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848488615" name="bEnforceBidLimit142848488615" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142852007250);">42662188L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142852007250' name='totalAmount142852007250' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142852007250,142852110452,null,document.forms[0].totalAmount142852007250.value,99999997952.00)' id='saveBtn142852007250' name='saveBtn142852007250' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142852007250" name="bEnforceBidLimit142852007250" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/20/2019 20:00 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142848474882);">42660863L</a></td>
+                <td class="evenTD">LA PORTE</td>
+                <td class="evenTD">TX</td>
+                <td class="evenTD">03/20/2019 07:00-03/21/2019 17:00 EDT</td>
+                <td class="evenTD">IRVINGTON</td>
+                <td class="evenTD">AL</td>
+                <td class="evenTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848474882' name='totalAmount142848474882' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848474882,142848523206,null,document.forms[0].totalAmount142848474882.value,999999.00)' id='saveBtn142848474882' name='saveBtn142848474882' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848474882" name="bEnforceBidLimit142848474882" value="false" />
+ 
+            <tr>
+                <td class="oddTD">03/20/2019 20:15 Eastern Time</td>
+                <td class="oddTD"><a href="javascript:displayTransport(142848467524);">42660860L</a></td>
+                <td class="oddTD">LA PORTE</td>
+                <td class="oddTD">TX</td>
+                <td class="oddTD">03/20/2019 08:00-03/21/2019 17:00 EDT</td>
+                <td class="oddTD">IRVINGTON</td>
+                <td class="oddTD">AL</td>
+                <td class="oddTD">03/21/2019 08:00-03/22/2019 17:00 EDT</td>
+                <td class="oddTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142848467524' name='totalAmount142848467524' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142848467524,142848518555,null,document.forms[0].totalAmount142848467524.value,999999.00)' id='saveBtn142848467524' name='saveBtn142848467524' value='Save'>&nbsp;</td>
+                <td class="oddTD"></td>
+                <td class="oddTD"></td>
+                <td class="oddTD">2</td>
+                <td class="oddTD">UNITED RENTALS INC.</td>
+                <td class="oddTD"></td>
+                <td class="oddTD">Christopher Rubio<BR>crubio@t-insight.com</td>
+                <td class="oddTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142848467524" name="bEnforceBidLimit142848467524" value="false" />
+ 
+            <tr>
+                <td class="evenTD">03/21/2019 08:33 Eastern Time</td>
+                <td class="evenTD"><a href="javascript:displayTransport(142852075517);">42662209L</a></td>
+                <td class="evenTD">RIDGEFIELD PARK</td>
+                <td class="evenTD">NJ</td>
+                <td class="evenTD">03/21/2019 08:00-03/25/2019 17:00 EDT</td>
+                <td class="evenTD">MONTICELLO</td>
+                <td class="evenTD">IN</td>
+                <td class="evenTD">03/27/2019 08:00-04/03/2019 12:00 EDT</td>
+                <td class="evenTD" style="text-align:right"> $ <input type='text' size='4' id='totalAmount142852075517' name='totalAmount142852075517' value=''  onPaste='return validateDollar(this, VAL_KEYPRESS, event);' onKeyPress='return validateDollar(this, VAL_KEYPRESS, event);' >&nbsp;<input type='button' onClick='updateBidTotal(142852075517,142852081821,null,document.forms[0].totalAmount142852075517.value,9999999999.99)' id='saveBtn142852075517' name='saveBtn142852075517' value='Save'>&nbsp;</td>
+                <td class="evenTD"></td>
+                <td class="evenTD"></td>
+                <td class="evenTD">2</td>
+                <td class="evenTD">UNITED RENTALS INC.</td>
+                <td class="evenTD"></td>
+                <td class="evenTD">Brandon Eggers<BR>beggers@t-insight.com</td>
+                <td class="evenTD"></td>
+            </tr>
+
+            <input type="hidden" id="bEnforceBidLimit142852075517" name="bEnforceBidLimit142852075517" value="false" />
+ 
+    </table>
+    <br>
+
+
+    <input type="button" value=" Refresh " onclick="refresh()" style="font-size: 8pt; font-family: Arial;">
+
+    </form>
+</body>
+</html>
+
+
+

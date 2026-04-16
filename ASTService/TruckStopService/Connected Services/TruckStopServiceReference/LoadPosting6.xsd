@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://webservices.truckstop.com/v11" elementFormDefault="qualified" targetNamespace="http://webservices.truckstop.com/v11" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/WebServices.Posting" />
+  <xs:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/WebServices.Objects" />
+  <xs:element name="PostLoads">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/WebServices.Posting" minOccurs="0" name="loads" nillable="true" type="q1:LoadPostingRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PostLoadsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="PostLoadsResult" nillable="true" type="q2:LoadPostingReturn" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteLoads">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/WebServices.Posting" minOccurs="0" name="loads" nillable="true" type="q3:LoadDeleteRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteLoadsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="DeleteLoadsResult" nillable="true" type="q4:LoadPostingReturn" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLoads">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/WebServices.Posting" minOccurs="0" name="listRequest" nillable="true" type="q5:LoadListRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLoadsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="GetLoadsResult" nillable="true" type="q6:LoadPostingListReturn" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteLoadsByLoadNumber">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/WebServices.Posting" minOccurs="0" name="deleteRequest" nillable="true" type="q7:LoadDeleteByLoadNumberRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteLoadsByLoadNumberResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="DeleteLoadsByLoadNumberResult" nillable="true" type="q8:LoadPostingReturn" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLoadViews">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/WebServices.Posting" minOccurs="0" name="loadNumber" nillable="true" type="q9:LoadViewsRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLoadViewsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="GetLoadViewsResult" nillable="true" type="q10:LoadViewsReturn" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLoadViewsByLoadNumber">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/WebServices.Posting" minOccurs="0" name="loadNumber" nillable="true" type="q11:LoadViewsByLoadNumberRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetLoadViewsByLoadNumberResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/WebServices.Objects" minOccurs="0" name="GetLoadViewsByLoadNumberResult" nillable="true" type="q12:LoadViewsReturn" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

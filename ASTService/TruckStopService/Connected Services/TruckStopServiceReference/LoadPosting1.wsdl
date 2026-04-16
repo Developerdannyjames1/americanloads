@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://webservices.truckstop.com/v11" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://webservices.truckstop.com/v11" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://webservices.truckstop.com/v11/Imports">
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd0" namespace="http://webservices.truckstop.com/v11" />
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/WebServices.Posting" />
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/WebServices" />
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/WebServices.Objects" />
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd5" namespace="http://schemas.datacontract.org/2004/07/Truckstop2.Objects" />
+      <xsd:import schemaLocation="http://localhost:8080/V13/Posting/LoadPosting.svc?xsd=xsd6" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="ILoadPosting_PostLoads_InputMessage">
+    <wsdl:part name="parameters" element="tns:PostLoads" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_PostLoads_OutputMessage">
+    <wsdl:part name="parameters" element="tns:PostLoadsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_DeleteLoads_InputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteLoads" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_DeleteLoads_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteLoadsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_GetLoads_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetLoads" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_GetLoads_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetLoadsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_DeleteLoadsByLoadNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteLoadsByLoadNumber" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_DeleteLoadsByLoadNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteLoadsByLoadNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_GetLoadViews_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetLoadViews" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_GetLoadViews_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetLoadViewsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_GetLoadViewsByLoadNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetLoadViewsByLoadNumber" />
+  </wsdl:message>
+  <wsdl:message name="ILoadPosting_GetLoadViewsByLoadNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetLoadViewsByLoadNumberResponse" />
+  </wsdl:message>
+  <wsdl:portType name="ILoadPosting">
+    <wsdl:operation name="PostLoads">
+      <wsdl:input wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/PostLoads" message="tns:ILoadPosting_PostLoads_InputMessage" />
+      <wsdl:output wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/PostLoadsResponse" message="tns:ILoadPosting_PostLoads_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteLoads">
+      <wsdl:input wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/DeleteLoads" message="tns:ILoadPosting_DeleteLoads_InputMessage" />
+      <wsdl:output wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/DeleteLoadsResponse" message="tns:ILoadPosting_DeleteLoads_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLoads">
+      <wsdl:input wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/GetLoads" message="tns:ILoadPosting_GetLoads_InputMessage" />
+      <wsdl:output wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/GetLoadsResponse" message="tns:ILoadPosting_GetLoads_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteLoadsByLoadNumber">
+      <wsdl:input wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/DeleteLoadsByLoadNumber" message="tns:ILoadPosting_DeleteLoadsByLoadNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/DeleteLoadsByLoadNumberResponse" message="tns:ILoadPosting_DeleteLoadsByLoadNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLoadViews">
+      <wsdl:input wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/GetLoadViews" message="tns:ILoadPosting_GetLoadViews_InputMessage" />
+      <wsdl:output wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/GetLoadViewsResponse" message="tns:ILoadPosting_GetLoadViews_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLoadViewsByLoadNumber">
+      <wsdl:input wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/GetLoadViewsByLoadNumber" message="tns:ILoadPosting_GetLoadViewsByLoadNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://webservices.truckstop.com/v11/ILoadPosting/GetLoadViewsByLoadNumberResponse" message="tns:ILoadPosting_GetLoadViewsByLoadNumber_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+</wsdl:definitions>

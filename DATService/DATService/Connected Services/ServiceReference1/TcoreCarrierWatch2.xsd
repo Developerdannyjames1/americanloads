@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:carwatchwsdl="http://www.tcore.com/TcoreCarrierWatch2.wsdl" xmlns:types="http://www.tcore.com/TcoreTypes.xsd" xmlns:cwexport="http://www.tcore.com/TcoreCarrierWatch2.xsd" xmlns:cwtypes="http://www.tcore.com/TcoreCarrierWatchTypes.xsd" elementFormDefault="qualified" targetNamespace="http://www.tcore.com/TcoreCarrierWatch2.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="TcoreTypes.xsd" namespace="http://www.tcore.com/TcoreTypes.xsd" />
+  <xs:import schemaLocation="TcoreCarrierWatchTypes.xsd" namespace="http://www.tcore.com/TcoreCarrierWatchTypes.xsd" />
+  <xs:annotation>
+    <xs:documentation>
+      <h2>Tcore Carrier Watch XML version 2 Schema</h2>
+      <br />
+
+            This schema defines the schema for version 2 of the XML download.  
+            <br />
+            Published:  Feburary, 2010<br />
+            Version  :  1.0.0<br /><br /><i>Copyright (C) 2010, TransCore LP, All Rights Reserved.</i><br /><br /><br /></xs:documentation>
+  </xs:annotation>
+  <xs:element name="CarrierWatch">
+    <xs:annotation>
+      <xs:documentation>
+                A list of watched companies.
+            </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" name="version" type="xs:decimal">
+          <xs:annotation>
+            <xs:documentation>
+                            The version of the XML schema being followed.
+                        </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element minOccurs="1" maxOccurs="1" name="timestamp" type="xs:dateTime">
+          <xs:annotation>
+            <xs:documentation>
+                            The date and time that the generation of the file started.
+                        </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element minOccurs="1" maxOccurs="1" name="subscriber">
+          <xs:annotation>
+            <xs:documentation>
+                            Identifies the TransCore customer for whom the data is generated.
+                        </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="1" maxOccurs="1" name="accountId" type="types:NonNegativeInt">
+                <xs:annotation>
+                  <xs:documentation>
+                                        The subscribers account id.
+                                    </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="1" maxOccurs="1" name="officeId" type="types:NonNegativeInt">
+                <xs:annotation>
+                  <xs:documentation>
+                                        The subscribers office id.
+                                    </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="1" maxOccurs="1" name="accountName" type="types:String50">
+                <xs:annotation>
+                  <xs:documentation>
+                                        The subscribers account name.
+                                    </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="company" type="cwexport:Company" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="Company">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="watchlistEntry" type="cwtypes:WatchlistEntry" />
+      <xs:element minOccurs="1" maxOccurs="1" name="lastUpdateOfCarrier" type="xs:dateTime">
+        <xs:annotation>
+          <xs:documentation>
+                        The last date on which the DOT updated their record for this carrier.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="header" type="cwtypes:Header">
+        <xs:annotation>
+          <xs:documentation>
+                        Basic information maintained by DOT about the carrier. Note that 
+                        there are (hopefully rare) cases in which the DOT does not provide 
+                        TransCore with even this basic information.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="dotProfile" type="cwtypes:DotProfile">
+        <xs:annotation>
+          <xs:documentation>
+                        Provides the operation details of a carrier available at DOT.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="dotAuthority" type="cwtypes:DotAuthority">
+        <xs:annotation>
+          <xs:documentation>
+                        Included only if the 'includeDotAuthority' flag is specified.<br /><br />
+                        This section describes the common, contract and broker authority 
+                        status of the target carrier.<br /><br />
+                        If the 'includeDotAuthority' flag was specified and this element is 
+                        <i>not</i> included in the response, then the carrier is <i>not</i>
+                        authorized.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="dotInsurance" type="cwtypes:DotInsuranceType">
+        <xs:annotation>
+          <xs:documentation>
+                        Describes a type of insurance carried by this carrier.
+                        An element will be included for each of the insurance types 
+                        carried by the carrier.<br /><br />
+                        Included only if the 'includeDotInsurance' flag is specified.<br /></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="insuranceCertificates" type="cwtypes:InsuranceCertificates">
+        <xs:annotation>
+          <xs:documentation>
+                        Only provided for full service watch levels.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="safestat" type="cwtypes:FmcsaSafeStat">
+        <xs:annotation>
+          <xs:documentation>
+                        Describes FMCSA-maintained safety data.<br /><br />
+                        Included only if the 'includeSafestat' flag is specified
+                        and if TransCore has current FMCSA SafeStat data on the 
+                        specified company.<br /><br />
+                        Describes the carrier's most recent safety evaluations scores 
+                        from the FMCSA SafeStat system. For more information regarding 
+                        the source of this information go to 
+                        http://ai.fmcsa.dot.gov/SafeStat/SafeStatMain.asp. 
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="safetyRating" type="cwtypes:FmcsaSafetyRating">
+        <xs:annotation>
+          <xs:documentation>
+                        Describes FMCSA-maintained safety data.<br /><br />
+                        Included only if the 'includeSafetyRating' flag is specified 
+                        and if TransCore has current FMCSA Safety data on the specified 
+                        company.<br /><br />
+                        Describes the carrier's most recent safety rating from the FMCSA. 
+                        For more information regarding the source of this information 
+                        go to http://safer.fmcsa.dot.gov/saferhelp.aspx#SafetyRating
+                        <br />
+                        Provided when safety data is requested.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="fmcsaInspections" type="cwtypes:FmcsaInspections">
+        <xs:annotation>
+          <xs:documentation>
+                        Describes FMCSA-maintained crash and inspection data.<br /><br />
+                        Included only if the 'includeFmcsaCrashInspection' flag is specified
+                        and if TransCore has current FMCSA Crash/Inspection data on the 
+                        specified company.<br /><br />
+                        Included only if the 'includeFmcsaCrashInspection' flag is specified.<br /><br />
+                        Describes the carrier's crash and inspection record over the last 
+                        24 months.  For more information regarding the source of this 
+                        information go to 
+                        http://safer.fmcsa.dot.gov/saferhelp.aspx#Inspection
+                        <br />
+                        Provided when safety data is requested.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="fmcsaCrashes" type="cwtypes:FmcsaCrashes">
+        <xs:annotation>
+          <xs:documentation>
+                        Describes FMCSA-maintained crash and inspection data.<br /><br />
+                        Included only if the 'includeFmcsaCrashInspection' flag is specified
+                        and if TransCore has current FMCSA Crash/Inspection data on the 
+                        specified company.<br /><br />
+                        Describes the carrier's crash and inspection record over the last 
+                        24 months.  For more information regarding the source of this 
+                        information go to 
+                        http://safer.fmcsa.dot.gov/saferhelp.aspx#Inspection<br /><br />
+                        Provided when safety data is requested.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="csa2010SafetyFitness" type="cwtypes:Csa2010SafetyFitness">
+        <xs:annotation>
+          <xs:documentation>
+                        The CSA 2010 Safety Fitness data.  Provided when it becomes available.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="csa2010Basics" type="cwtypes:Csa2010BasicMeasurements">
+        <xs:annotation>
+          <xs:documentation>
+                        The CSA 2010 Basic Measurement data.  Provided when it becomes available.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="1" name="extendedProfile" type="cwtypes:ExtendedProfile">
+        <xs:annotation>
+          <xs:documentation>
+                        Additional data collected from the carrier by TransCore.
+                        Provided when territory is selected.
+                    </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

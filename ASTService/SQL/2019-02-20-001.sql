@@ -1,0 +1,1 @@
+INSERT INTO [dbo].[LoadTypes] ([Name] ,[IdDAT] ,[NameDAT] ,[IdTS] ,[NameTS]) VALUES('Drive Away', 'DriveTowaway', 'Drive/Tow away', 'DA', 'Drive Away')
