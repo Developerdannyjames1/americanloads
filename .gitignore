@@ -54,3 +54,6 @@ TestResult.xml
 nunit-*.xml
 
 ConnectionStrings.config
+node_modules/
+.vs/
+package-lock.json
