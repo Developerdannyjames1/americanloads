@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -40,5 +40,18 @@ namespace ASTDAT.Web.Models
         [StringLength(15)]
         public string Location { get; set; }
         public IEnumerable<SelectListItem> Locations { get; set; }
+
+        /// <summary>Shown when editing a carrier; set by Admin, Dispatch, or Manager.</summary>
+        [Display(Name = "Carrier approval status")]
+        public string CarrierApprovalStatus { get; set; }
+
+        public bool IsCarrierUser { get; set; }
+
+        public int? CompanyId { get; set; }
+        [Display(Name = "Company")]
+        public string CompanyName { get; set; }
+        public string CompanyType { get; set; }
+        [Display(Name = "Company onboarding status")]
+        public string CompanyOnboardingStatus { get; set; }
     }
 }

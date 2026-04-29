@@ -1,4 +1,4 @@
-﻿@model ASTDAT.Web.Models.EditUserViewModel
+@model ASTDAT.Web.Models.EditUserViewModel
 
 @{
     ViewBag.Title = "Edit";
@@ -17,6 +17,7 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
         @Html.HiddenFor(model => model.UserName)
+        @Html.HiddenFor(model => model.CompanyId)
         <div class="form-group">
             @Html.LabelFor(m => m.UserName, new { @class = "col-md-2 control-label" })
             <div class="col-md-10">
@@ -98,6 +99,35 @@
                 }
             </span>
         </div>
+        @if (Model.CompanyId != null)
+        {
+            <div class="form-group">
+                <label class="col-md-2 control-label">Company</label>
+                <div class="col-md-10">
+                    <p class="form-control-static">@Model.CompanyName (@Model.CompanyType)</p>
+                </div>
+            </div>
+            if (User.IsInRole("Admin"))
+            {
+                <div class="form-group">
+                    @Html.LabelFor(m => m.CompanyOnboardingStatus, new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.CompanyOnboardingStatus, (SelectList)ViewBag.CompanyOnboardingStatuses, new { @class = "form-control" })
+                        <p class="help-block">Onboarding applies to all users in this company (pending, approved, rejected, suspended, needs_review).</p>
+                    </div>
+                </div>
+            }
+        }
+        @if (Model.IsCarrierUser && User.IsInRole("Admin") && Model.CompanyId == null)
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.CarrierApprovalStatus, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(m => m.CarrierApprovalStatus, (SelectList)ViewBag.CarrierStatuses, new { @class = "form-control" })
+                    <p class="help-block">Legacy carrier status (no company record).</p>
+                </div>
+            </div>
+        }
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
@@ -121,6 +151,13 @@
             $('#Password').on('focusout', function () {
                 console.log('focusout');
                 $('.passwordInfo').hide();
+            });
+            $('input[name="SelectedRole"][value="Carrier"], input[name="SelectedRole"][value="Shipper"]').on('change', function () {
+                var v = $(this).val();
+                if ($(this).is(':checked') && (v === 'Carrier' || v === 'Shipper')) {
+                    var other = v === 'Carrier' ? 'Shipper' : 'Carrier';
+                    $('input[name="SelectedRole"][value="' + other + '"]').prop('checked', false);
+                }
             });
         });
     </script>

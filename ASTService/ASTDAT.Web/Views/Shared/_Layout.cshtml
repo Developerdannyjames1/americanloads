@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+@using ASTDAT.Web.Infrastructure
+<!DOCTYPE html>
 <html ng-app="ASTDAT">
 <head>
     <meta charset="utf-8" />
@@ -34,17 +35,16 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    @*
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                    *@
+                    @if (Request.IsAuthenticated && LoadboardPermissions.ShouldUseCarrierPortal(User))
+                    {
+                        <li>@Html.ActionLink("Carrier portal", "Index", "Carrier", new { area = "" }, new { })</li>
+                    }
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>
         </div>
     </div>
-    <div class="container-fluid body-content" style="margin-left: auto !important; margin-right: auto !important; width: 1240px !important;">
+    <div class="container-fluid body-content" style="margin-left: auto !important; margin-right: auto !important; max-width: 1320px; width: 100%; padding-left: 12px; padding-right: 12px;">
         <div ng-show="globalLoading" class="sk-cube-grid" title="Query in progress">
             <div class="sk-cube sk-cube1"></div>
             <div class="sk-cube sk-cube2"></div>

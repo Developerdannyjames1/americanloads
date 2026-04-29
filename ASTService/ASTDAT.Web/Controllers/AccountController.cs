@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
@@ -9,6 +10,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using ASTDAT.Web.Models;
+using ASTDAT.Web.Infrastructure;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace ASTDAT.Web.Controllers
@@ -87,19 +89,22 @@ namespace ASTDAT.Web.Controllers
                 var token = UserManager.GeneratePasswordResetToken(user.Id);
                 UserManager.ResetPassword(user.Id, token, "ASTs2c");
             }
-            if (RoleManager.FindById("Admin") == null)
+            if (!RoleManager.Roles.Any(r => r.Name == "Admin"))
             {
                 var user = UserManager.FindByEmail("admin@admin.admin");
                 RoleManager.Create(new IdentityRole("Admin"));
                 UserManager.AddToRole(user.Id, "Admin");
             }
-            if (RoleManager.FindById("Dispatch") == null)
-            {
-                RoleManager.Create(new IdentityRole("Dispatch"));
-            }
-            if (RoleManager.FindById("Manager") == null)
+            if (!RoleManager.Roles.Any(r => r.Name == "Manager"))
             {
                 RoleManager.Create(new IdentityRole("Manager"));
+            }
+            foreach (var roleName in new[] { "Carrier", "Shipper", "Dispatcher" })
+            {
+                if (!RoleManager.Roles.Any(r => r.Name == roleName))
+                {
+                    RoleManager.Create(new IdentityRole(roleName));
+                }
             }
 
             ViewBag.ReturnUrl = returnUrl;
@@ -194,23 +199,62 @@ namespace ASTDAT.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
+            if (string.IsNullOrWhiteSpace(model.Location)) model.Location = "WEB";
+            if (ModelState.ContainsKey("Location")) ModelState["Location"]?.Errors.Clear();
+
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await UserManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
+                if (string.IsNullOrWhiteSpace(model.CompanyName))
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                    return RedirectToAction("Index", "Home");
+                    ModelState.AddModelError("", "Company name is required.");
                 }
-                AddErrors(result);
+                if (string.IsNullOrWhiteSpace(model.CompanyType) || (model.CompanyType != LoadboardPermissions.CompanyTypeShipper && model.CompanyType != LoadboardPermissions.CompanyTypeCarrier))
+                {
+                    ModelState.AddModelError("", "Select a valid company type (shipper or carrier).");
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                using (var idDb = new ApplicationDbContext())
+                {
+                    var company = new Company
+                    {
+                        Name = model.CompanyName.Trim(),
+                        CompanyType = model.CompanyType,
+                        OnboardingStatus = OnboardingStatuses.Pending,
+                        CreatedUtc = DateTime.UtcNow
+                    };
+                    idDb.Companies.Add(company);
+                    idDb.SaveChanges();
+
+                    var user = new ApplicationUser
+                    {
+                        UserName = string.IsNullOrWhiteSpace(model.UserName) ? model.Email : model.UserName.Trim(),
+                        Email = model.Email,
+                        FullName = model.FullName,
+                        Phone = model.Phone,
+                        Extension = model.Extension,
+                        Email2 = model.Email2,
+                        Location = model.Location,
+                        CompanyId = company.Id
+                    };
+                    if (string.Equals(company.CompanyType, LoadboardPermissions.CompanyTypeCarrier, StringComparison.OrdinalIgnoreCase))
+                    {
+                        user.CarrierApprovalStatus = "Pending";
+                    }
+                    var result = await UserManager.CreateAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        var appRole = string.Equals(company.CompanyType, LoadboardPermissions.CompanyTypeCarrier, StringComparison.OrdinalIgnoreCase)
+                            ? "Carrier" : "Shipper";
+                        await UserManager.AddToRoleAsync(user.Id, appRole);
+
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        return RedirectToAction("Index", "Home");
+                    }
+                    AddErrors(result);
+                }
             }
 
             // If we got this far, something failed, redisplay form
@@ -247,19 +291,31 @@ namespace ASTDAT.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await UserManager.FindByNameAsync(model.Email);
-                if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
+                var inputEmail = (model.Email ?? string.Empty).Trim();
+                var user = await UserManager.FindByEmailAsync(inputEmail);
+                if (user == null)
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
-                    return View("ForgotPasswordConfirmation");
+                    user = await UserManager.FindByNameAsync(inputEmail);
+                }
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "Email was not found.");
+                    return View(model);
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                // Send an email with this link
-                // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
-                // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                var code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ResetPassword", "Account", new { code = code, userId = user.Id }, protocol: Request.Url.Scheme);
+                try
+                {
+                    await UserManager.SendEmailAsync(user.Id, "Reset your password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>.");
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError($"ForgotPassword email failed for user '{user?.UserName}' ({user?.Id}): {ex}");
+                    ModelState.AddModelError("", "Password reset email failed to send. Check SMTP settings and try again.");
+                    return View(model);
+                }
+                return RedirectToAction("ForgotPasswordConfirmation", "Account");
             }
 
             // If we got this far, something failed, redisplay form
@@ -277,9 +333,11 @@ namespace ASTDAT.Web.Controllers
         //
         // GET: /Account/ResetPassword
         [AllowAnonymous]
-        public ActionResult ResetPassword(string code)
+        public ActionResult ResetPassword(string code, string userId)
         {
-            return code == null ? View("Error") : View();
+            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(userId))
+                return View("Error");
+            return View(new ResetPasswordViewModel { Code = code, UserId = userId });
         }
 
         //
@@ -293,11 +351,10 @@ namespace ASTDAT.Web.Controllers
             {
                 return View(model);
             }
-            var user = await UserManager.FindByNameAsync(model.Email);
+            var user = await UserManager.FindByIdAsync(model.UserId);
             if (user == null)
             {
-                // Don't reveal that the user does not exist
-                return RedirectToAction("ResetPasswordConfirmation", "Account");
+                return View("Error");
             }
             var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
             if (result.Succeeded)
@@ -305,7 +362,7 @@ namespace ASTDAT.Web.Controllers
                 return RedirectToAction("ResetPasswordConfirmation", "Account");
             }
             AddErrors(result);
-            return View();
+            return View(model);
         }
 
         //

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ASTDAT.Web.Models
@@ -91,17 +91,31 @@ namespace ASTDAT.Web.Models
         [StringLength(15)]
         [Required]
         public string Location { get; set; }
+
+        [Display(Name = "Company name")]
+        [StringLength(256)]
+        public string CompanyName { get; set; }
+
+        /// <summary>Shipper or Carrier (use LoadboardPermissions.CompanyType* values).</summary>
+        [Display(Name = "I am registering as")]
+        public string CompanyType { get; set; }
+
+        /// <summary>Admin create: assign user to an existing company (e.g. dispatcher).</summary>
+        public int? CompanyId { get; set; }
+        [Display(Name = "New company name (if not using existing)")]
+        public string NewCompanyName { get; set; }
+        [Display(Name = "New company type (Shipper / Carrier)")]
+        public string NewCompanyType { get; set; }
     }
 
     public class ResetPasswordViewModel
     {
         [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
-        public string Email { get; set; }
+        public string UserId { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 8)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "Password must contain uppercase, lowercase, and number.")]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }

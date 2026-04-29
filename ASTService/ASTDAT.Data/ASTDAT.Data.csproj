@@ -57,9 +57,12 @@
     <Compile Include="DATLoginModel.cs" />
     <Compile Include="DBContext.cs" />
     <Compile Include="ImportLogModel.cs" />
+    <Compile Include="LoadClaimModel.cs" />
     <Compile Include="LoadCommentModel.cs" />
     <Compile Include="LoadHistoryModel.cs" />
     <Compile Include="LoadModel.cs" />
+    <Compile Include="LoadTemplateModel.cs" />
+    <Compile Include="LoadWorkflowStatuses.cs" />
     <Compile Include="LoadTypeModel.cs" />
     <Compile Include="LocationModel.cs" />
     <Compile Include="OriginDestinationModel.cs" />

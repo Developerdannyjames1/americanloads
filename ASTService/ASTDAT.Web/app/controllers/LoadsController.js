@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
 
     'use strict';
 
@@ -13,6 +13,7 @@
             SortDate: 2,
             Sort: '',
         };
+        $scope.loadClaimsRows = [];
 
 		$(document).on('focus', '.ui-select-search', function () {
 			$scope.$parent.$root.$broadcast('closeAll', true);
@@ -29,6 +30,180 @@
         $scope.filter = {
             DateFromD: moment(new Date()).format('L'),
             DateToD: moment(new Date()).format('L'),
+            LaneSearch: '',
+            EquipmentTypeSearch: ''
+        };
+
+        $scope.filtersAdvancedOpen = false;
+
+        $scope.applyTopFilters = function () {
+            $scope.filter.LaneSearch = ($scope.filter.LaneSearch || '').trim();
+            $scope.filter.EquipmentTypeSearch = ($scope.filter.EquipmentTypeSearch || '').trim();
+            $scope.refresh(1);
+        };
+
+        $scope.templates = [];
+        $scope.templateModel = { Name: '', IsGlobal: false, CompanyId: null };
+        $scope.selectedTemplateId = null;
+        $scope.templateCompanyOptions = [];
+
+        $scope.loadTemplates = function () {
+            if (!$scope.data || !$scope.data.CurrentUserCanCreateOrEditLoads) {
+                $scope.templates = [];
+                return;
+            }
+            LoadsService.templatesList({}, function (resp) {
+                $scope.templates = ((resp || {}).List || (resp || {}).list || []);
+                $scope.templateCompanyOptions = ((resp || {}).CompanyOptions || (resp || {}).companyOptions || []);
+            });
+        };
+
+        function toDateOrNull(v) {
+            if (!v) { return null; }
+            var d = new Date(v);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function sameId(a, b) {
+            if (a == null || b == null) { return false; }
+            return String(a) === String(b);
+        }
+
+        function applyTemplateById(id) {
+            var t = ($scope.templates || []).filter(function (x) { return sameId(x.Id, id) || sameId(x.id, id); })[0];
+            if (!t || !$scope.currentLoad) { return; }
+            var loadTypeId = t.LoadTypeId != null ? t.LoadTypeId : t.loadTypeId;
+            if (loadTypeId && $scope.data && $scope.data.AllLoadTypes) {
+                var match = ($scope.data.AllLoadTypes || []).filter(function (lt) { return sameId(lt.Id, loadTypeId) || sameId(lt.id, loadTypeId); })[0];
+                if (match) { $scope.currentLoad.LoadType = match; }
+            }
+            $scope.currentLoad.AssetLength = t.AssetLength != null ? t.AssetLength : t.assetLength;
+            $scope.currentLoad.Weight = t.Weight != null ? t.Weight : t.weight;
+            var notes = t.Notes != null ? t.Notes : t.notes;
+            $scope.currentLoad.Description = notes;
+            $scope.currentLoad.UserNotes = notes;
+
+            var oid = t.OriginId != null ? t.OriginId : t.originId;
+            var did = t.DestinationId != null ? t.DestinationId : t.destinationId;
+            var originCity = t.OriginCity != null ? t.OriginCity : t.originCity;
+            var originState = t.OriginState != null ? t.OriginState : t.originState;
+            var destinationCity = t.DestinationCity != null ? t.DestinationCity : t.destinationCity;
+            var destinationState = t.DestinationState != null ? t.DestinationState : t.destinationState;
+            if (oid && $scope.data && $scope.data.OriginDestinations) {
+                var o = ($scope.data.OriginDestinations || []).filter(function (x) { return sameId(x.Id, oid) || sameId(x.id, oid); })[0];
+                if (o) { $scope.currentLoad.Origin = o; }
+            } else if (originCity || originState) {
+                $scope.currentLoad.Origin = {
+                    Id: null,
+                    City: originCity || '',
+                    State: { Code: originState || '' },
+                    StateCode: originState || ''
+                };
+            }
+            if (did && $scope.data && $scope.data.OriginDestinations) {
+                var d = ($scope.data.OriginDestinations || []).filter(function (x) { return sameId(x.Id, did) || sameId(x.id, did); })[0];
+                if (d) { $scope.currentLoad.Destination = d; }
+            } else if (destinationCity || destinationState) {
+                $scope.currentLoad.Destination = {
+                    Id: null,
+                    City: destinationCity || '',
+                    State: { Code: destinationState || '' },
+                    StateCode: destinationState || ''
+                };
+            }
+
+            $timeout(function () {
+                if ($scope.currentLoad && $scope.currentLoad.Origin) {
+                    $scope.$broadcast('angucomplete-alt:changeInput', 'OriginAC', $scope.currentLoad.Origin);
+                }
+                if ($scope.currentLoad && $scope.currentLoad.Destination) {
+                    $scope.$broadcast('angucomplete-alt:changeInput', 'DestinationAC', $scope.currentLoad.Destination);
+                }
+            }, 50);
+        }
+
+        function applySelectedTemplate(id) {
+            if (id !== null && id !== undefined && id !== '') {
+                applyTemplateById(id);
+                if (window.toastr) { window.toastr.success('Template applied.'); }
+            }
+        }
+
+        $scope.onTemplateChanged = function (id) {
+            applySelectedTemplate(id != null ? id : $scope.selectedTemplateId);
+        };
+
+        $scope.$watch('selectedTemplateId', function (newVal, oldVal) {
+            if (newVal === oldVal) { return; }
+            applySelectedTemplate(newVal);
+        });
+
+        $scope.saveCurrentAsTemplate = function () {
+            if (!$scope.data || !$scope.data.CurrentUserCanCreateOrEditLoads) { return; }
+            if (!$scope.currentLoad) { return; }
+            var name = ($scope.templateModel.Name || '').trim();
+            if (!name) {
+                if (window.toastr) { window.toastr.warning('Template name is required.'); }
+                return;
+            }
+            var payload = {
+                Name: name,
+                IsGlobal: !!$scope.templateModel.IsGlobal,
+                CompanyId: $scope.templateModel.IsGlobal ? null : ($scope.templateModel.CompanyId || null),
+                LoadTypeId: $scope.currentLoad.LoadType ? $scope.currentLoad.LoadType.Id : null,
+                AssetLength: $scope.currentLoad.AssetLength,
+                Weight: $scope.currentLoad.Weight,
+                OriginId: $scope.currentLoad.Origin ? $scope.currentLoad.Origin.Id : null,
+                DestinationId: $scope.currentLoad.Destination ? $scope.currentLoad.Destination.Id : null,
+                OriginCity: $scope.currentLoad.Origin ? $scope.currentLoad.Origin.City : null,
+                OriginState: $scope.currentLoad.Origin ? (($scope.currentLoad.Origin.State || {}).Code || $scope.currentLoad.Origin.StateCode) : null,
+                DestinationCity: $scope.currentLoad.Destination ? $scope.currentLoad.Destination.City : null,
+                DestinationState: $scope.currentLoad.Destination ? (($scope.currentLoad.Destination.State || {}).Code || $scope.currentLoad.Destination.StateCode) : null,
+                Notes: ($scope.currentLoad.UserNotes || $scope.currentLoad.Description || '')
+            };
+            LoadsService.templateSave(payload, function (resp) {
+                if (resp && resp.Ok) {
+                    if (window.toastr) { window.toastr.success('Template saved.'); }
+                    $scope.templateModel.Name = '';
+                    $scope.templateModel.IsGlobal = false;
+                    $scope.templateModel.CompanyId = null;
+                    $scope.loadTemplates();
+                } else if (window.toastr) {
+                    window.toastr.error((resp && resp.message) || 'Could not save template.');
+                }
+            }, function (e) {
+                if (window.toastr) { window.toastr.error((e && e.data && e.data.message) || 'Could not save template.'); }
+            });
+        };
+
+        $scope.duplicateLoad = function (form) {
+            if (!$scope.data || !$scope.data.CurrentUserCanCreateOrEditLoads) { return; }
+            if (!$scope.currentLoad) { return; }
+            var src = angular.copy($scope.currentLoad);
+            src.Id = 0;
+            src.AssetId = null;
+            src.TrackStopId = null;
+            src.TsLoadId = null;
+            src.DateDatDeleted = null;
+            src.DateTSDeleted = null;
+            src.WorkflowStatus = 'draft';
+            src.PickUpDate = null;
+            src.DeliveryDate = null;
+            src.PickUpDateTime = null;
+            src.DeliveryDateTime = null;
+            src.CreateDate = null;
+            src.UpdateDate = null;
+            src.CreatedBy = null;
+            src.UpdatedBy = null;
+            src.selected = false;
+            $scope.currentLoad = src;
+            $scope.selectedTemplateId = null;
+            if (form) { form.$submitted = false; }
+            $timeout(function () {
+                $scope.$broadcast('angucomplete-alt:changeInput', 'OriginAC', $scope.currentLoad.Origin);
+                $scope.$broadcast('angucomplete-alt:changeInput', 'DestinationAC', $scope.currentLoad.Destination);
+            }, 50);
+            if (window.toastr) { window.toastr.info('Load duplicated as draft. Update dates/details and save.'); }
         };
 
         $interval(function () {
@@ -37,7 +212,28 @@
             }
         }, 1 * 60 * 1000);
 
-		$scope.refresh = function (page) {
+        var applyClientTopFilters = function (list) {
+            var lane = ($scope.filter.LaneSearch || '').toLowerCase().trim();
+            var equip = ($scope.filter.EquipmentTypeSearch || '').toLowerCase().trim();
+
+            if (!lane && !equip) {
+                return list;
+            }
+
+            return (list || []).filter(function (item) {
+                var originCity = (((item || {}).Origin || {}).City || '').toLowerCase();
+                var destinationCity = (((item || {}).Destination || {}).City || '').toLowerCase();
+                var loadTypeName = ((((item || {}).LoadType || {}).Name) || '').toLowerCase();
+                var equipmentType = ((item || {}).EquipmentType || '').toLowerCase();
+
+                var laneOk = !lane || originCity.indexOf(lane) !== -1 || destinationCity.indexOf(lane) !== -1;
+                var equipOk = !equip || loadTypeName.indexOf(equip) !== -1 || equipmentType.indexOf(equip) !== -1;
+
+                return laneOk && equipOk;
+            });
+        };
+
+        $scope.refresh = function (page) {
             var q = {
                 SortDate: $scope.data.SortDate,
                 Sort: $scope.data.Sort,
@@ -52,6 +248,8 @@
                 DestinStates: $scope.filter.DestinStates,
 				Id: $scope.filter.Id,
 				RefId: $scope.filter.RefId,
+                LaneSearch: $scope.filter.LaneSearch,
+                EquipmentTypeSearch: $scope.filter.EquipmentTypeSearch,
                 Page: page || $scope.data.Page,
                 ShowDeleted: $scope.data.ShowDeleted,
                 //FullLoad: !$scope.data.AllCities,
@@ -62,15 +260,35 @@
                 var selected = $scope.data.ListFiltered.filter(function (e) {
                     return e.selected === true;
                 });
-				$scope.data = data;
-				var emptyCompany = $scope.data.AllCompanies.find(function (e) {
-					return e === '';
-				});
-				if (emptyCompany) {
-					$scope.data.AllCompanies = [''].concat($scope.data.AllCompanies);
-				}
-                for (var i = 0; i < $scope.data.List.length; i++) {
-                    var item = $scope.data.List[i];
+                var raw = data || {};
+                $scope.data = raw;
+                if (raw.Exception1 || raw.exception1) {
+                    if (window.toastr) {
+                        toastr.error(String(raw.Exception1 || raw.exception1) + (raw.Exception2 || raw.exception2 ? ' — ' + (raw.Exception2 || raw.exception2) : ''), 'Load list error', { timeOut: 0 });
+                    }
+                }
+                var list = raw.List != null ? raw.List : (raw.list != null ? raw.list : []);
+                var allCompanies = raw.AllCompanies != null ? raw.AllCompanies : (raw.allCompanies != null ? raw.allCompanies : []);
+                $scope.data.List = list;
+                $scope.data.AllCompanies = allCompanies;
+                $scope.data.CurrentUserCanSetCarrierPay = !!(raw.CurrentUserCanSetCarrierPay || raw.currentUserCanSetCarrierPay);
+                $scope.data.CurrentUserCanSetBilledToCustomer = !!(raw.CurrentUserCanSetBilledToCustomer || raw.currentUserCanSetBilledToCustomer);
+                $scope.data.CurrentUserCanCreateOrEditLoads = !!(raw.CurrentUserCanCreateOrEditLoads || raw.currentUserCanCreateOrEditLoads);
+                $scope.data.CurrentUserCanManageClaims = !!(raw.CurrentUserCanManageClaims || raw.currentUserCanManageClaims);
+                $scope.data.CurrentUserCanSubmitClaim = !!(raw.CurrentUserCanSubmitClaim || raw.currentUserCanSubmitClaim);
+                $scope.data.ViewerUserId = raw.ViewerUserId != null && raw.ViewerUserId !== '' ? raw.ViewerUserId : (raw.viewerUserId != null && raw.viewerUserId !== '' ? raw.viewerUserId : ($scope.data.ViewerUserId || ''));
+                $scope.data.CurrentUserIsInternalStaff = !!(raw.CurrentUserIsInternalStaff || raw.currentUserIsInternalStaff);
+                $scope.data.CurrentUserIsShipper = !!(raw.CurrentUserIsShipper || raw.currentUserIsShipper);
+                var emptyCompany = (allCompanies || []).find(function (e) {
+                    return e === '';
+                });
+                if (emptyCompany) {
+                    $scope.data.AllCompanies = [''].concat($scope.data.AllCompanies || []);
+                }
+                var displayList = applyClientTopFilters(list);
+
+                for (var i = 0; i < displayList.length; i++) {
+                    var item = displayList[i];
 
                     if (selected.find(function (e) {
                         return e.Id === item.Id;
@@ -79,7 +297,7 @@
                         $scope.selectedCount++;
                     }
                 }
-                $scope.data.ListFiltered = data.List;
+                $scope.data.ListFiltered = displayList;
                 //$scope.doFilter(data);
             });
         };
@@ -134,9 +352,16 @@
 
         $scope.filterDate = function () {
             $('#modalDates').modal('hide');
+            var from = $scope.filter.DateFromD ? moment($scope.filter.DateFromD) : null;
+            var to = $scope.filter.DateToD ? moment($scope.filter.DateToD) : null;
+            if (from && to && from.isAfter(to)) {
+                var tmp = $scope.filter.DateFromD;
+                $scope.filter.DateFromD = $scope.filter.DateToD;
+                $scope.filter.DateToD = tmp;
+            }
             $scope.filter.DateFrom = $scope.filter.DateFromD;
             $scope.filter.DateTo = $scope.filter.DateToD;
-            $scope.refresh();
+            $scope.refresh(1);
         };
 
         $scope.showFilterZip = function (mode) {
@@ -322,15 +547,20 @@
         };
 
         $scope.clearFilters = function () {
-            $scope.filter.DestinationCities = '';
-            $scope.filter.DestinStates = '';
-            $scope.filter.OriginCities = '';
-            $scope.filter.OriginStates = '';
-            $scope.filter.Companies = '';
+            $scope.filter.DestinationCities = [];
+            $scope.filter.DestinStates = [];
+            $scope.filter.OriginCities = [];
+            $scope.filter.OriginStates = [];
+            $scope.filter.Companies = [];
             $scope.filter.DateFrom = undefined;
             $scope.filter.DateTo = undefined;
+            $scope.filter.DateFromD = moment(new Date()).format('L');
+            $scope.filter.DateToD = moment(new Date()).format('L');
 			$scope.filter.Id = '';
 			$scope.filter.RefId = '';
+            $scope.filter.LaneSearch = '';
+            $scope.filter.EquipmentTypeSearch = '';
+            $scope.filtersAdvancedOpen = false;
             $scope.refresh();
         };
 
@@ -357,6 +587,14 @@
                 ClientName: $scope.data.AllCompanies.length > 0 ? $scope.data.AllCompanies[0] : '',
                 CarrierAmount: 0,
             };
+            if (!$scope.currentLoad.Id) {
+                $scope.currentLoad.WorkflowStatus = 'draft';
+            }
+            if ($scope.data.CurrentUserCanCreateOrEditLoads && (!$scope.templates || $scope.templates.length === 0)) {
+                $scope.loadTemplates();
+            }
+            $scope.selectedTemplateId = null;
+            $scope.loadClaimsRows = [];
 
             $('#modalLoad').modal('show');
             $timeout(function () {
@@ -367,6 +605,11 @@
                 $scope.$broadcast('angucomplete-alt:changeInput', 'OriginAC', $scope.currentLoad.Origin);
                 $scope.$broadcast('angucomplete-alt:changeInput', 'DestinationAC', $scope.currentLoad.Destination);
             }, 200);
+            if ($scope.data.CurrentUserCanManageClaims && $scope.currentLoad.Id) {
+                $timeout(function () {
+                    $scope.reloadClaims();
+                }, 400);
+            }
         };
 
         $scope.updateDAT = function (form) {
@@ -433,25 +676,47 @@
 					function () {
 						$('#modalLoadingToLoadBoard').modal('show');
 						fn($scope.currentLoad, function (data) {
+                            if (!data || data.Ok !== true || !data.model) {
+                                if (window.toastr) { window.toastr.error((data && data.message) || 'Save failed. Please check required fields and permissions.'); }
+                                $('#modalLoadingToLoadBoard').modal('hide');
+                                return;
+                            }
 							data.model.Origin.StateCode = data.model.Origin.State.Code;
 							data.model.Destination.StateCode = data.model.Destination.State.Code;
 							$scope.currentLoad = data.model;
 							$scope.currentLoad.Uploaded = true;
 							$scope.uploadErrors = data.errors;
 							$scope.refresh();
-						});
+						}, function (err) {
+                            if (window.toastr) {
+                                var m = (err && err.data && (err.data.message || err.data.Message)) || err.statusText || 'Save failed.';
+                                window.toastr.error(String(m));
+                            }
+                            $('#modalLoadingToLoadBoard').modal('hide');
+                        });
 					}
 				);
 			} else {
 				$('#modalLoadingToLoadBoard').modal('show');
 				fn($scope.currentLoad, function (data) {
+                    if (!data || data.Ok !== true || !data.model) {
+                        if (window.toastr) { window.toastr.error((data && data.message) || 'Save failed. Please check required fields and permissions.'); }
+                        $('#modalLoadingToLoadBoard').modal('hide');
+                        return;
+                    }
 					data.model.Origin.StateCode = data.model.Origin.State.Code;
 					data.model.Destination.StateCode = data.model.Destination.State.Code;
 					$scope.currentLoad = data.model;
 					$scope.currentLoad.Uploaded = true;
 					$scope.uploadErrors = data.errors;
 					$scope.refresh();
-				});
+				}, function (err) {
+                    if (window.toastr) {
+                        var m2 = (err && err.data && (err.data.message || err.data.Message)) || err.statusText || 'Save failed.';
+                        window.toastr.error(String(m2));
+                    }
+                    $('#modalLoadingToLoadBoard').modal('hide');
+                });
 			}
         };
 
@@ -568,7 +833,7 @@
         };
 
         $scope.getTableHeigth = function () {
-            return window.innerHeight - 335;
+            return window.innerHeight - 380;
         };
 
         $scope.showViewRecord = function () {
@@ -747,5 +1012,129 @@
 
 			return str.toUpperCase();
 		};
+
+        $scope.estimatedProfit = function () {
+            if (!$scope.currentLoad) return null;
+            var b = Number($scope.currentLoad.CustomerAmount);
+            var p = Number($scope.currentLoad.CarrierAmount);
+            if (isNaN(b) && isNaN(p)) return null;
+            return (isNaN(b) ? 0 : b) - (isNaN(p) ? 0 : p);
+        };
+
+        $scope.estimatedMarginPct = function () {
+            var b = Number($scope.currentLoad && $scope.currentLoad.CustomerAmount);
+            if (!b || isNaN(b) || b === 0) return null;
+            var pr = $scope.estimatedProfit();
+            if (pr === null || isNaN(pr)) return null;
+            return Math.round((pr / b) * 10000) / 100;
+        };
+
+        $scope.reloadClaims = function () {
+            if (!$scope.currentLoad || !$scope.currentLoad.Id) {
+                $scope.loadClaimsRows = [];
+                return;
+            }
+            LoadsService.loadClaimsList({ loadId: $scope.currentLoad.Id }, function (rows) {
+                $scope.loadClaimsRows = rows || [];
+            }, function () {
+                $scope.loadClaimsRows = [];
+            });
+        };
+
+        $scope.postDraftToBoard = function () {
+            if (!$scope.currentLoad || !$scope.currentLoad.Id) return;
+            LoadsService.postToBoard({ Id: $scope.currentLoad.Id }, function () {
+                NgBootBoxService.alert('Load posted to boards.', 'AST Loads App');
+                $scope.refresh();
+                $('#modalLoad').modal('hide');
+            }, function () {
+                NgBootBoxService.alert('Could not post load.', 'AST Loads App');
+            });
+        };
+
+        $scope.submitClaimOnLoad = function (asBid) {
+            var bidAmt = null;
+            if (asBid) {
+                var raw = window.prompt('Bid amount (USD):', '');
+                if (raw === null) return;
+                bidAmt = parseFloat(raw, 10);
+                if (isNaN(bidAmt)) {
+                    NgBootBoxService.alert('Invalid bid amount.', 'AST Loads App');
+                    return;
+                }
+            }
+            LoadsService.submitClaim({
+                LoadId: $scope.currentLoad.Id,
+                ClaimType: asBid ? 'bid' : 'claim',
+                BidAmount: bidAmt,
+                Message: ''
+            }, function () {
+                NgBootBoxService.alert('Submitted.', 'AST Loads App');
+                $scope.reloadClaims();
+                $scope.refresh();
+            }, function () {
+                NgBootBoxService.alert('Submit failed.', 'AST Loads App');
+            });
+        };
+
+        $scope.acceptClaimRow = function (row) {
+            var cid = row.id != null ? row.id : row.Id;
+            LoadsService.acceptClaim({ Id: cid }, function () {
+                $scope.reloadClaims();
+                $scope.refresh();
+            });
+        };
+
+        $scope.rejectClaimRow = function (row) {
+            var cid = row.id != null ? row.id : row.Id;
+            LoadsService.rejectClaim({ Id: cid }, function () {
+                $scope.reloadClaims();
+                $scope.refresh();
+            });
+        };
+
+        $scope.workflowUpdating = false;
+        $scope.viewerUserId = function () {
+            return ($scope.data && ($scope.data.ViewerUserId || $scope.data.viewerUserId)) || '';
+        };
+        $scope.canSetLoadExecutionWorkflow = function () {
+            var cl = $scope.currentLoad;
+            if (!cl || !cl.Id) return false;
+            var viewer = $scope.viewerUserId();
+            var carrier = cl.AssignedCarrierUserId != null ? cl.AssignedCarrierUserId : cl.assignedCarrierUserId;
+            if ($scope.data.CurrentUserCanManageClaims || $scope.data.currentUserCanManageClaims) return true;
+            if ($scope.data.CurrentUserIsInternalStaff || $scope.data.currentUserIsInternalStaff) return true;
+            return !!(viewer && carrier && carrier === viewer);
+        };
+        $scope.canCancelLoadWorkflow = function () {
+            var cl = $scope.currentLoad;
+            if (!cl || !cl.Id) return false;
+            var viewer = $scope.viewerUserId();
+            var shipper = cl.ShipperUserId != null ? cl.ShipperUserId : cl.shipperUserId;
+            if ($scope.data.CurrentUserCanManageClaims || $scope.data.currentUserCanManageClaims) return true;
+            if ($scope.data.CurrentUserIsInternalStaff || $scope.data.currentUserIsInternalStaff) return true;
+            return !!($scope.data.CurrentUserIsShipper || $scope.data.currentUserIsShipper) && !!(viewer && shipper && shipper === viewer);
+        };
+        $scope.workflowLifecycleSectionVisible = function () {
+            return $scope.canSetLoadExecutionWorkflow() || $scope.canCancelLoadWorkflow();
+        };
+        $scope.setLoadWorkflow = function (status) {
+            if (!$scope.currentLoad || !$scope.currentLoad.Id || $scope.workflowUpdating) return;
+            var st = (status || '').toLowerCase();
+            if (st === 'in_transit' || st === 'delivered' || st === 'completed') {
+                if (!$scope.canSetLoadExecutionWorkflow()) return;
+            } else if (st === 'cancelled') {
+                if (!$scope.canCancelLoadWorkflow()) return;
+            }
+            $scope.workflowUpdating = true;
+            LoadsService.setWorkflow({ Id: $scope.currentLoad.Id, Status: status }, function () {
+                $scope.workflowUpdating = false;
+                $scope.refresh();
+                $('#modalLoad').modal('hide');
+            }, function () {
+                $scope.workflowUpdating = false;
+                NgBootBoxService.alert('Status update failed.', 'AST Loads App');
+            });
+        };
 	};
 }());

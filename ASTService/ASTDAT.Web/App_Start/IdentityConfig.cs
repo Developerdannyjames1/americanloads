@@ -1,7 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
@@ -18,8 +21,24 @@ namespace ASTDAT.Web
     {
         public Task SendAsync(IdentityMessage message)
         {
-            // Plug in your email service here to send an email.
-            return Task.FromResult(0);
+            return Task.Run(() => SendSmtpSync(message));
+        }
+
+        private static void SendSmtpSync(IdentityMessage message)
+        {
+            var host = ConfigurationManager.AppSettings["SmtpHost"];
+            if (string.IsNullOrWhiteSpace(host)) return;
+
+            var from = ConfigurationManager.AppSettings["SmtpFrom"] ?? "noreply@local";
+            var port = 587;
+            if (int.TryParse(ConfigurationManager.AppSettings["SmtpPort"], out var p)) port = p;
+            var useSsl = ConfigurationManager.AppSettings["SmtpUseSsl"] != "false";
+            var user = ConfigurationManager.AppSettings["SmtpUser"];
+            var pass = ConfigurationManager.AppSettings["SmtpPassword"];
+            var msg = new MailMessage(from, message.Destination) { IsBodyHtml = true, Body = message.Body, Subject = message.Subject };
+            var client = new SmtpClient(host, port) { EnableSsl = useSsl, DeliveryMethod = SmtpDeliveryMethod.Network, UseDefaultCredentials = false };
+            if (!string.IsNullOrEmpty(user)) client.Credentials = new NetworkCredential(user, pass);
+            client.Send(msg);
         }
     }
 

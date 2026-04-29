@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -16,7 +16,7 @@
     <AssemblyName>ASTDAT.Web</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -284,7 +284,10 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\API\LoadClaimsController.cs" />
+    <Compile Include="Controllers\API\LoadEventsController.cs" />
     <Compile Include="Controllers\API\LoadsController.cs" />
+    <Compile Include="Controllers\CarrierController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IntegrationController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -307,8 +310,17 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\EditUserViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\Company.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Infrastructure\PredicateBuilder.cs" />
+    <Compile Include="Infrastructure\OnboardingStatuses.cs" />
+    <Compile Include="Infrastructure\LoadFinanceHelper.cs" />
+    <Compile Include="Infrastructure\LoadEventLog.cs" />
+    <Compile Include="Infrastructure\LoadNotificationService.cs" />
+    <Compile Include="Infrastructure\LoadboardPermissions.cs" />
+    <Compile Include="Infrastructure\SimpleJwt.cs" />
+    <Compile Include="Infrastructure\JwtAuthMessageHandler.cs" />
+    <Compile Include="Controllers\API\TokenController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -376,6 +388,7 @@
     <None Include="Properties\PublishProfiles\AST-TEST.pubxml" />
     <None Include="Properties\PublishProfiles\AST-WORK.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
+    <Content Include="Scripts\carrier-portal.js" />
     <Content Include="Scripts\dis.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -401,6 +414,8 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\AddLoad.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Carrier\Index.cshtml" />
+    <Content Include="Views\Carrier\Pending.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
     <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
@@ -499,9 +514,9 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>62331</DevelopmentServerPort>
+          <DevelopmentServerPort>64567</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:8074</IISUrl>
+          <IISUrl>http://localhost:64567</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

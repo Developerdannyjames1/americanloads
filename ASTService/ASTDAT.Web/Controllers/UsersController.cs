@@ -1,4 +1,5 @@
-﻿using ASTDAT.Data.Models;
+using ASTDAT.Data.Models;
+using ASTDAT.Web.Infrastructure;
 using ASTDAT.Web.Models;
 using Microsoft.AspNet.Identity.Owin;
 using System;
@@ -51,21 +52,40 @@ namespace ASTDAT.Web.Controllers
         }
 
         // GET: Users
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var vm = UserManager.Users.Select(p =>
-               new EditUserViewModel()
-               {
-                   Id = p.Id,
-                   UserName = p.UserName,
-                   Email = p.Email,
-                   FullName = p.FullName,
-                   RolesList = RoleManager.Roles.OrderBy(o => o.Name).Where(r => r.Users.Any(u => u.UserId == p.Id)).ToList().Select(x => new SelectListItem()
-                   {
-                       Text = x.Name.Contains("Approver") ? "Portal Approver" : x.Name,
-                       Value = x.Name
-                   })
-               }).ToList();
+            var users = await UserManager.Users.OrderBy(x => x.UserName).ToListAsync();
+            var companyIds = users.Select(u => u.CompanyId).Where(x => x != null).Select(x => x.Value).Distinct().ToList();
+            Dictionary<int, Company> companyById;
+            using (var app = new ApplicationDbContext())
+            {
+                companyById = app.Companies.Where(c => companyIds.Contains(c.Id)).ToList().ToDictionary(c => c.Id, c => c);
+            }
+            var vm = new List<EditUserViewModel>();
+            foreach (var p in users)
+            {
+                var roleNames = await UserManager.GetRolesAsync(p.Id);
+                Company comp = null;
+                if (p.CompanyId != null) companyById.TryGetValue(p.CompanyId.Value, out comp);
+                vm.Add(new EditUserViewModel
+                {
+                    Id = p.Id,
+                    UserName = p.UserName,
+                    Email = p.Email,
+                    FullName = p.FullName,
+                    CarrierApprovalStatus = p.CarrierApprovalStatus,
+                    IsCarrierUser = roleNames.Contains("Carrier"),
+                    CompanyId = p.CompanyId,
+                    CompanyName = comp?.Name,
+                    CompanyType = comp?.CompanyType,
+                    CompanyOnboardingStatus = comp?.OnboardingStatus,
+                    RolesList = RoleManager.Roles.OrderBy(o => o.Name).Where(r => r.Users.Any(u => u.UserId == p.Id)).ToList().Select(x => new SelectListItem
+                    {
+                        Text = x.Name.Contains("Approver") ? "Portal Approver" : x.Name,
+                        Value = x.Name
+                    })
+                });
+            }
 
             return View(vm);
         }
@@ -78,11 +98,15 @@ namespace ASTDAT.Web.Controllers
             //ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
             ViewBag.RoleId = RoleManager.Roles.ToList().Select(x => new SelectListItem()
             {
-                Selected = false,
+                Selected = x.Name == "Shipper",
                 Text = x.Name,
                 Value = x.Name
             }).ToList();
             ViewBag.Locations = new SelectList(db.Locations.OrderBy(x => x.Location).ToList(), "Location", "Location");
+            using (var idDb = new ApplicationDbContext())
+            {
+                ViewBag.Companies = new SelectList(idDb.Companies.OrderBy(c => c.Name).ToList(), "Id", "Name");
+            }
             return View();
         }
 
@@ -93,18 +117,56 @@ namespace ASTDAT.Web.Controllers
             var db = new DBContext();
             selectedRoles = selectedRoles ?? new string[] { };
             ViewBag.SelectedRoles = selectedRoles;
-            //ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
             ViewBag.RoleId = RoleManager.Roles.ToList().Select(x => new SelectListItem()
             {
-                Selected = selectedRoles.Contains(x.Name),
+                Selected = selectedRoles.Contains(x.Name) || (selectedRoles.Length == 0 && x.Name == "Shipper"),
                 Text = x.Name,
                 Value = x.Name
             }).ToList();
             ViewBag.Locations = new SelectList(db.Locations.OrderBy(x => x.Location).ToList(), "Location", "Location");
+            using (var idDb = new ApplicationDbContext())
+            {
+                ViewBag.Companies = new SelectList(idDb.Companies.OrderBy(c => c.Name).ToList(), "Id", "Name");
+            }
+
+            if (selectedRoles == null || selectedRoles.Length == 0)
+            {
+                selectedRoles = new[] { "Shipper" };
+            }
+
+            var roleError = ValidateRoleRules(selectedRoles, userViewModel.CompanyId, userViewModel.NewCompanyName, userViewModel.NewCompanyType);
+            if (roleError != null) ModelState.AddModelError("", roleError);
+
+            int? resolvedCompanyId = userViewModel.CompanyId;
+            if (ModelState.IsValid && !string.IsNullOrWhiteSpace(userViewModel.NewCompanyName) && !string.IsNullOrWhiteSpace(userViewModel.NewCompanyType))
+            {
+                using (var idDb = new ApplicationDbContext())
+                {
+                    var comp = new Company
+                    {
+                        Name = userViewModel.NewCompanyName.Trim(),
+                        CompanyType = userViewModel.NewCompanyType,
+                        OnboardingStatus = OnboardingStatuses.Pending,
+                        CreatedUtc = DateTime.UtcNow
+                    };
+                    idDb.Companies.Add(comp);
+                    idDb.SaveChanges();
+                    resolvedCompanyId = comp.Id;
+                }
+            }
 
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser {
+                if (selectedRoles.Contains("Dispatcher") && resolvedCompanyId == null)
+                    ModelState.AddModelError("", "Dispatcher must be linked to a company (select existing or create new).");
+                if ((selectedRoles.Contains("Shipper") || selectedRoles.Contains("Carrier")) && resolvedCompanyId == null)
+                    ModelState.AddModelError("", "Shipper and carrier users must belong to a company (create new or pick existing).");
+            }
+
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
                     UserName = userViewModel.UserName,
                     Email = userViewModel.Email,
                     FullName = userViewModel.FullName,
@@ -112,10 +174,12 @@ namespace ASTDAT.Web.Controllers
                     Extension = userViewModel.Extension,
                     Email2 = userViewModel.Email2,
                     Location = userViewModel.Location,
+                    CompanyId = resolvedCompanyId
                 };
+                if (selectedRoles.Contains("Carrier")) user.CarrierApprovalStatus = "Pending";
+
                 var adminresult = await UserManager.CreateAsync(user, userViewModel.Password);
 
-                //Add User to the selected Roles 
                 if (adminresult.Succeeded)
                 {
                     if (selectedRoles != null)
@@ -123,7 +187,6 @@ namespace ASTDAT.Web.Controllers
                         var result = await UserManager.AddToRolesAsync(user.Id, selectedRoles);
                         if (!result.Succeeded)
                         {
-
                             ModelState.AddModelError("", result.Errors.First());
                             return View();
                         }
@@ -131,10 +194,8 @@ namespace ASTDAT.Web.Controllers
                 }
                 else
                 {
-
                     ModelState.AddModelError("", adminresult.Errors.First());
                     return View();
-
                 }
                 return RedirectToAction("Index");
             }
@@ -158,6 +219,15 @@ namespace ASTDAT.Web.Controllers
 
             var db = new DBContext();
 
+            Company comp = null;
+            if (user.CompanyId != null)
+            {
+                using (var idDb = new ApplicationDbContext())
+                {
+                    comp = idDb.Companies.Find(user.CompanyId);
+                }
+            }
+
             var vm = new EditUserViewModel()
             {
                 Id = user.Id,
@@ -168,6 +238,12 @@ namespace ASTDAT.Web.Controllers
                 Extension = user.Extension,
                 Location = user.Location,
                 Email2 = user.Email2,
+                CarrierApprovalStatus = user.CarrierApprovalStatus,
+                IsCarrierUser = userRoles.Contains("Carrier"),
+                CompanyId = user.CompanyId,
+                CompanyName = comp?.Name,
+                CompanyType = comp?.CompanyType,
+                CompanyOnboardingStatus = comp?.OnboardingStatus,
                 Locations = new SelectList(db.Locations.OrderBy(x => x.Location).ToList(), "Location", "Location"),
                 RolesList = RoleManager.Roles.ToList().Select(x => new SelectListItem()
                 {
@@ -177,6 +253,12 @@ namespace ASTDAT.Web.Controllers
                 })
             };
 
+            ViewBag.CarrierStatuses = new SelectList(
+                CarrierApprovalStatuses.All.Select(s => new { Value = s, Text = s }),
+                "Value", "Text", user.CarrierApprovalStatus ?? CarrierApprovalStatuses.Pending);
+            ViewBag.CompanyOnboardingStatuses = new SelectList(
+                OnboardingStatuses.All.Select(s => new { Value = s, Text = s }),
+                "Value", "Text", comp?.OnboardingStatus ?? OnboardingStatuses.Pending);
 
             return View(vm);
         }
@@ -199,6 +281,15 @@ namespace ASTDAT.Web.Controllers
                 Text = x.Name,
                 Value = x.Name
             });
+
+            var userBeingEditedPre = await UserManager.FindByIdAsync(editUser.Id);
+            PrepareCarrierStatusesOnEdit(editUser, userBeingEditedPre, userRoles);
+
+            var carrierShipperErrorEdit = ValidateCarrierShipperExclusive(selectedRole);
+            if (carrierShipperErrorEdit != null)
+            {
+                ModelState.AddModelError("", carrierShipperErrorEdit);
+            }
 
             if (ModelState.IsValid)
             {
@@ -247,6 +338,44 @@ namespace ASTDAT.Web.Controllers
                     ModelState.AddModelError("", result.Errors.First());
                     return View(editUser);
                 }
+
+                var updatedRoles = await UserManager.GetRolesAsync(user.Id);
+                if (updatedRoles.Contains("Carrier"))
+                {
+                    if (string.IsNullOrEmpty(user.CarrierApprovalStatus))
+                    {
+                        user.CarrierApprovalStatus = CarrierApprovalStatuses.Pending;
+                    }
+                    if (LoadboardPermissions.CanApproveUsersAndCompanies(User)
+                        && !string.IsNullOrEmpty(editUser.CarrierApprovalStatus)
+                        && CarrierApprovalStatuses.All.Contains(editUser.CarrierApprovalStatus))
+                    {
+                        user.CarrierApprovalStatus = editUser.CarrierApprovalStatus;
+                    }
+                }
+                else
+                {
+                    user.CarrierApprovalStatus = null;
+                }
+
+                if (user.CompanyId != null && LoadboardPermissions.CanApproveUsersAndCompanies(User) && !string.IsNullOrEmpty(editUser.CompanyOnboardingStatus))
+                {
+                    var normalized = OnboardingStatuses.Normalize(editUser.CompanyOnboardingStatus);
+                    if (!string.IsNullOrEmpty(normalized) && OnboardingStatuses.All.Contains(normalized))
+                    {
+                        using (var idDb = new ApplicationDbContext())
+                        {
+                            var c = idDb.Companies.Find(user.CompanyId.Value);
+                            if (c != null)
+                            {
+                                c.OnboardingStatus = normalized;
+                                idDb.SaveChanges();
+                            }
+                        }
+                    }
+                }
+
+                await UserManager.UpdateAsync(user);
                 return RedirectToAction("Index");
             }
             ModelState.AddModelError("", "Something failed.");
@@ -294,6 +423,53 @@ namespace ASTDAT.Web.Controllers
                 return RedirectToAction("Index");
             }
             return View();
+        }
+
+        private static string ValidateRoleRules(string[] roles, int? companyId, string newCompanyName, string newCompanyType)
+        {
+            roles = roles ?? new string[0];
+            if (roles.Contains("Carrier") && roles.Contains("Shipper"))
+            {
+                return "A user cannot be both Carrier and Shipper. Choose one (or staff roles without mixing those two).";
+            }
+            if (roles.Contains("Dispatcher") && (roles.Contains("Shipper") || roles.Contains("Carrier") || roles.Contains("Admin")))
+            {
+                return "Dispatcher must be a single sub-role: select only Dispatcher, together with a company link.";
+            }
+            if (roles.Contains("Dispatcher") && companyId == null && string.IsNullOrWhiteSpace(newCompanyName))
+            {
+                return "For Dispatcher, select an existing company, or create a new company and type.";
+            }
+            if ((roles.Contains("Shipper") || roles.Contains("Carrier")) && string.IsNullOrWhiteSpace(newCompanyName) && (companyId == null))
+            {
+                return "Shipper/Carrier: pick an existing company, or create one with new company name and type.";
+            }
+            return null;
+        }
+
+        private static string ValidateCarrierShipperExclusive(string[] roles)
+        {
+            roles = roles ?? new string[0];
+            if (roles.Contains("Carrier") && roles.Contains("Shipper"))
+            {
+                return "A user cannot be both Carrier and Shipper. Choose one (or staff roles without mixing those two).";
+            }
+            return null;
+        }
+
+        private void PrepareCarrierStatusesOnEdit(EditUserViewModel editUser, ApplicationUser dbUser, IList<string> roles)
+        {
+            editUser.IsCarrierUser = roles != null && roles.Contains("Carrier");
+            if (string.IsNullOrEmpty(editUser.CarrierApprovalStatus) && dbUser != null)
+            {
+                editUser.CarrierApprovalStatus = dbUser.CarrierApprovalStatus;
+            }
+            ViewBag.CarrierStatuses = new SelectList(
+                CarrierApprovalStatuses.All.Select(s => new { Value = s, Text = s }),
+                "Value", "Text", editUser.CarrierApprovalStatus ?? CarrierApprovalStatuses.Pending);
+            ViewBag.CompanyOnboardingStatuses = new SelectList(
+                OnboardingStatuses.All.Select(s => new { Value = s, Text = s }),
+                "Value", "Text", editUser.CompanyOnboardingStatus ?? OnboardingStatuses.Pending);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model List<ASTDAT.Web.Models.EditUserViewModel>
+@model List<ASTDAT.Web.Models.EditUserViewModel>
 
 @{
     ViewBag.Title = "Users List";
@@ -38,6 +38,9 @@
             <th>
                 Roles
             </th>
+            <th>
+                Carrier (legacy) / company
+            </th>
         </tr>
 
         @foreach (var item in Model)
@@ -62,6 +65,18 @@
                 </td>
                 <td>
                     @String.Join(", ", item.RolesList.Select(x => x.Text))
+                </td>
+                <td>
+                    @if (item.CompanyId != null)
+                    {
+                        <span>@(item.CompanyName ?? "") (@(item.CompanyType ?? ""))</span>
+                        <br />
+                        <span class="text-muted">@((item.CompanyOnboardingStatus != null) ? item.CompanyOnboardingStatus : "-")</span>
+                    }
+                    else
+                    {
+                        <span>@(item.IsCarrierUser ? (item.CarrierApprovalStatus ?? "-") : "-")</span>
+                    }
                 </td>
             </tr>
         }

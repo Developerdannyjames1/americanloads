@@ -1,4 +1,4 @@
-﻿@model ASTDAT.Web.Models.RegisterViewModel
+@model ASTDAT.Web.Models.RegisterViewModel
 @{
     ViewBag.Title = "Register";
 }
@@ -27,6 +27,19 @@
         @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
         <div class="col-md-10">
             @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.CompanyName, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.CompanyName, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.CompanyType, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            <label class="radio-inline">@Html.RadioButtonFor(m => m.CompanyType, "Shipper") Shipper (post loads)</label>
+            <label class="radio-inline">@Html.RadioButtonFor(m => m.CompanyType, "Carrier") Carrier (trucking)</label>
         </div>
     </div>
     <div class="form-group">

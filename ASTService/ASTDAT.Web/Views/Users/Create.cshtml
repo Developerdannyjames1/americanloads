@@ -1,4 +1,4 @@
-﻿@model ASTDAT.Web.Models.RegisterViewModel
+@model ASTDAT.Web.Models.RegisterViewModel
 @{
     ViewBag.Title = "Edit User";
 }
@@ -80,6 +80,24 @@
         </div>
     </div>
     <div class="form-group">
+        @Html.Label("Existing company", new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(m => m.CompanyId, (SelectList)ViewBag.Companies, "-- optional (e.g. dispatcher) --", new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.NewCompanyName, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.NewCompanyName, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.NewCompanyType, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(m => m.NewCompanyType, new SelectList(new[] { "", "Shipper", "Carrier" }), new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
         <label class="col-md-2 control-label">
             Select User Role
         </label>
@@ -112,6 +130,14 @@
             $('#Password').on('focusout', function () {
                 console.log('focusout');
                 $('.passwordInfo').hide();
+            });
+            // Carrier and Shipper are mutually exclusive
+            $('input[name="SelectedRoles"][value="Carrier"], input[name="SelectedRoles"][value="Shipper"]').on('change', function () {
+                var v = $(this).val();
+                if ($(this).is(':checked') && (v === 'Carrier' || v === 'Shipper')) {
+                    var other = v === 'Carrier' ? 'Shipper' : 'Carrier';
+                    $('input[name="SelectedRoles"][value="' + other + '"]').prop('checked', false);
+                }
             });
         });
     </script>

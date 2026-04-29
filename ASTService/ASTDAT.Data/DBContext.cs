@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
@@ -24,6 +24,8 @@ namespace ASTDAT.Data.Models
         public DbSet<LoadHistoryModel> LoadHistory { get; set; }
         public DbSet<LocationModel> Locations { get; set; }
         public DbSet<LoadCommentModel> LoadComments { get; set; }
+        public DbSet<LoadClaimModel> LoadClaims { get; set; }
+        public DbSet<LoadTemplateModel> LoadTemplates { get; set; }
 
         public DBContext() : base("DefaultConnection")
         {
@@ -78,6 +80,12 @@ namespace ASTDAT.Data.Models
 
             modelBuilder.Entity<LoadCommentModel> ()
                 .ToTable("LoadComments");
+
+            modelBuilder.Entity<LoadClaimModel>()
+                .ToTable("LoadClaims");
+
+            modelBuilder.Entity<LoadTemplateModel>()
+                .ToTable("LoadTemplates");
 
             base.OnModelCreating(modelBuilder);
         }

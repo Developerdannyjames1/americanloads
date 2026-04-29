@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,5 +87,24 @@ namespace ASTDAT.Data.Models
         public bool? AllowUntilSat { get; set; }
 		public bool? AllowUntilSun { get; set; }
 		public Guid? TsLoadId { get; set; }
+
+        /// <summary>draft, posted, claimed, assigned, in_transit, delivered, completed, cancelled; null = legacy load (treated as posted for visibility).</summary>
+        [StringLength(32)]
+        public string WorkflowStatus { get; set; }
+
+        [StringLength(128)]
+        public string ShipperUserId { get; set; }
+
+        [StringLength(128)]
+        public string AssignedCarrierUserId { get; set; }
+
+        [StringLength(500)]
+        public string Commodity { get; set; }
+
+        [NotMapped]
+        public decimal? Profit { get; set; }
+
+        [NotMapped]
+        public decimal? MarginPercent { get; set; }
 	}
 }
