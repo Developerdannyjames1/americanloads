@@ -1,62 +1,46 @@
-ASTService/packages/
-ASTService/ASTService/bin/Debug/Out/
-ASTService/ASTService/bin/
-ASTService/ASTService/obj/
-ASTService/.vs/
-ConsoleApp/obj/
-WindowsFormsApp1/obj/
-Other/
-connexionQS/
-DATService/DatService/bin/Debug
-DATService/DatService/bin/
-DATService/DatService/obj/
-ASTService/Data/bin/
-ASTService/Data/obj/
-ConsoleApp/bin/
-WindowsFormsApp1/bin/
-ASTService/ASTDAT.Data/bin/
-ASTService/ASTDAT.Data/obj/
-ASTService/ASTDAT.Web/bin/
-ASTService/ASTDAT.Web/obj/
-ASTService/ASTDAT.Web/ASTDAT.Web.csproj.user
-ASTService/ASTDAT.Web/ConnectionStrings.config
-ASTService/ASTDAT.Web/Libs/
-ASTService/ASTDAT.Web/node_modules/
-ASTService/ASTDAT.Web/package-lock.json
-ASTService/ASTDAT.Web/Properties/PublishProfiles/FolderProfile.pubxml.user
-ASTService/TruckStopService/bin/
-ASTService/TruckStopService/obj/
-*.pdf
-AmericanSpecializedSOAP Load Post API Field List.xlsx
-ASTService/ASTDAT.Tools/bin/
-ASTService/ASTDAT.Tools/obj/
-ASTService/ASTDAT.Web/App_Data/Log.txt
-ASTService/ASTDAT.Web/App_Data/
-CheckDATLoads/bin/
-CheckDATLoads/obj/
-ASTService/ASTDAT.Web/AppSettings.config
-ASTService/ASTDAT.Web/ASTDAT.Web.zip
-AST 2019-05-21-001.BAK
-ASTService/ASTDAT.Web/Properties/PublishProfiles/AST-TEST.pubxml.user
-ASTService/ASTDAT.Web/Properties/PublishProfiles/AST-WORK.pubxml.user
-ASTService/ASTDAT.Web/Libs.zip
-ASTService/TruckStopRestfullService/bin/
-ASTService/TruckStopRestfullService/obj/
-ASTService/TSRestFullTest/bin/
-ASTService/TSRestFullTest/obj/
-ttt.txt
-ttt.zip
+# Dependencies
+node_modules/
 
-# Global IDE/user files
-.vs/
-*.user
-*.suo
-*.cache
-*.zip
-# Logs and backups
+# Builds & caches
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment & secrets (commit `.env.example` only if you add one)
+.env
+.env.*
+!.env.example
+
+# Logs & debug
+logs/
 *.log
-*.bak
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# DATService output folders (correct casing/path)
-DATService/DATService/bin/
-DATService/DATService/obj/
+# Testing & coverage
+coverage/
+.nyc_output/
+
+# Lint / tooling cache
+.eslintcache
+.prettiercache
+
+# Next.js (Vercel)
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE / editors
+.idea/
+*.swp
+*.swo
+*~

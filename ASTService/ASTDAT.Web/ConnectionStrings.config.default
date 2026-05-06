@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<connectionStrings>
-  <add name="DefaultConnection" connectionString="data source=.\SQLEXPRESS;Initial Catalog=ASTDAT;User ID=sa;Password=" providerName="System.Data.SqlClient" />
-</connectionStrings>

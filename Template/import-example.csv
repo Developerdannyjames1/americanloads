@@ -1,6 +1,0 @@
-# assets,move type,pick up start date,pick up end date,days use,delivery completion date,asset type,asset sub type,asset length,origin name,origin city,origin state,destination city,destination state,price,vin,asset number,year,liftpads,vented,foodgradeonly,rail,job,organization notes,dont use bol
-1,loadout,9/1/2014,12/27/2015,10,,Reefer,,53,Dallas yard,San Diego,CA,Minneapolis,MN,500,,,2014,TRUE,TRUE,TRUE,FALSE,Testing,OrgNotes,FALSE
-2,loadout,9/1/2014,12/28/2015,10,,Flatbed,,45,Dallas yard,Oakland,CA,Portland,OR,300,,,2012,FALSE,FALSE,FALSE,FALSE,,,False
-1,loadout,9/1/2014,12/29/2015,10,,Van,,57,Dallas yard,Dallas,TX,Omaha,NE,250,1234567890ABCDEFG,truck 1233,2011,TRUE,FALSE,FALSE,FALSE,,,False
-3,driveaway,9/1/2014,12/30/2015,10,,Van,,57,Something,Dallas,TX,Omaha,NE,500,,,2011,TRUE,FALSE,FALSE,FALSE,,,False
-3,driveaway,9/1/2014,12/31/2015,10,,Van,,57,,Dallas,TX,Fargo,ND,600,,,2011,TRUE,FALSE,FALSE,FALSE,,,False

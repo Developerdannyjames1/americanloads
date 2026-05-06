@@ -1,1 +1,0 @@
-ALTER TABLE Loads ADD Comments varchar(MAX)
