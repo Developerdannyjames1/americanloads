@@ -6,7 +6,6 @@ function normalizeBackendOrigin(value) {
   let normalized = String(value).trim();
   if (!normalized) return fallback;
 
-  // Fix common typos: /ttp:/..., ttp://..., http:/...
   normalized = normalized.replace(/^\/+/, '');
   if (normalized.startsWith('ttp://') || normalized.startsWith('ttp:/')) {
     normalized = `h${normalized}`;
@@ -14,7 +13,6 @@ function normalizeBackendOrigin(value) {
   normalized = normalized.replace(/^http:\//, 'http://');
   normalized = normalized.replace(/^https:\//, 'https://');
 
-  // Allow values with/without scheme and strip trailing /api
   if (!/^https?:\/\//i.test(normalized)) {
     normalized = `http://${normalized}`;
   }
@@ -36,4 +34,5 @@ const nextConfig = {
     ];
   },
 };
+
 export default nextConfig;
