@@ -4,6 +4,10 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'americanloads — Loadboard',
   description: 'Modern freight loadboard',
+  icons: {
+    icon: '/logo.jpg',
+    apple: '/logo.jpg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

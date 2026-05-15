@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthBrand } from '@/components/brand-logo';
 
 function ResetForm() {
   const params = useSearchParams();
@@ -106,7 +107,9 @@ function ResetForm() {
 export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md flex flex-col items-center gap-4">
+        <AuthBrand />
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Choose a new password</CardTitle>
           <CardDescription>Use at least 8 characters.</CardDescription>
@@ -117,6 +120,7 @@ export default function ResetPasswordPage() {
           </Suspense>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthBrand } from '@/components/brand-logo';
 
 export default function RegisterPage() {
   const [locations, setLocations] = useState<Array<{ id?: number; code: string; name: string }>>([]);
@@ -80,7 +81,9 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md flex flex-col items-center gap-4">
+        <AuthBrand />
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Create your account</CardTitle>
           <CardDescription>
@@ -184,6 +187,7 @@ export default function RegisterPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

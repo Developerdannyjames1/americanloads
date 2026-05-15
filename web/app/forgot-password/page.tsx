@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthBrand } from '@/components/brand-logo';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -30,7 +31,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md flex flex-col items-center gap-4">
+        <AuthBrand />
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Reset your password</CardTitle>
           <CardDescription>We'll send you a reset link by email.</CardDescription>
@@ -69,6 +72,7 @@ export default function ForgotPasswordPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

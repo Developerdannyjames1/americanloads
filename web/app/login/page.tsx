@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthBrand } from '@/components/brand-logo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +43,9 @@ export default function LoginPage() {
           </div>
         </div>
       )}
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md flex flex-col items-center gap-4">
+        <AuthBrand />
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>Sign in to americanloads</CardDescription>
@@ -72,6 +75,7 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

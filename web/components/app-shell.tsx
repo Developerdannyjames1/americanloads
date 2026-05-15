@@ -19,6 +19,7 @@ import { canAccessCarrierPortal, canCreateLoads } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { UserContext, type UserSession } from '@/lib/user-context';
+import { SidebarBrand } from '@/components/brand-logo';
 
 const NAV: Array<{ href: string; label: string; icon: any; roles?: string[] }> = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -91,8 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-500"
               aria-hidden
             />
-            <div className="font-bold text-[13px] tracking-tight text-sky-200 uppercase mt-2">americanloads</div>
-            <div className="text-[11px] font-medium text-sky-400/65 truncate mt-0.5">{session.company?.name || 'Loadboard'}</div>
+            <SidebarBrand />
           </div>
           <nav className="flex-1 py-3 px-2 space-y-0.5">
             {nav.map((n) => {
