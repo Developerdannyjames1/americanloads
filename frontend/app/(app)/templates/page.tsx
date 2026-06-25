@@ -94,7 +94,18 @@ export default function TemplatesPage() {
         delete payload.companyId;
       } else if (!payload.isGlobal && !payload.companyId) {
         throw new Error('Select a shipper company for non-global template');
+      } else if (payload.companyId) {
+        payload.companyId = Number(payload.companyId);
       }
+      if (payload.trailerLengthFt !== '' && payload.trailerLengthFt != null) {
+        payload.assetLength = Number(payload.trailerLengthFt);
+      }
+      if (payload.weightLbs !== '' && payload.weightLbs != null) {
+        payload.weight = Number(payload.weightLbs);
+      }
+      delete payload.trailerLengthFt;
+      delete payload.weightLbs;
+      delete payload.equipmentType;
       await Api.saveTemplate(payload);
       await reload();
       setForm({
