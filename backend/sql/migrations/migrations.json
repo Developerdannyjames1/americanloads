@@ -1,0 +1,8 @@
+[
+  "AddCarrierApprovalStatus_AspNetUsers.sql",
+  "AddCompany_Onboarding_AspNetUsers.sql",
+  "AddLoads_Workflow_LoadClaims.sql",
+  "AddLoadTemplates.sql",
+  "FixCompanies_Columns_If_Missing.sql",
+  "MergeDispatch_Role_Into_Dispatcher.sql"
+]
