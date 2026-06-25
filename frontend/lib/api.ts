@@ -65,6 +65,7 @@ export const Api = {
   // claims (Nest: POST /api/claims, GET /api/claims?loadId=…)
   submitClaim: (payload: any) => api('/claims', { method: 'POST', json: payload }),
   myClaims: () => api<any[]>('/claims/mine'),
+  claimsInbox: () => api<any[]>('/claims'),
   claimsForLoad: (loadId: string) =>
     api<any[]>(`/claims?loadId=${encodeURIComponent(loadId)}`),
   acceptClaim: (id: string) => api(`/claims/${id}/accept`, { method: 'PATCH' }),

@@ -16,5 +16,8 @@ export class SaveTemplateDto {
   @IsOptional() @Type(() => Number) @IsNumber() weight?: number;
   @IsOptional() @ValidateNested() @Type(() => TemplatePlaceDto) origin?: TemplatePlaceDto;
   @IsOptional() @ValidateNested() @Type(() => TemplatePlaceDto) destination?: TemplatePlaceDto;
+  /** @deprecated Prefer description + userNotes */
   @IsOptional() @IsString() notes?: string;
+  @IsOptional() @IsString() description?: string;
+  @IsOptional() @IsString() userNotes?: string;
 }

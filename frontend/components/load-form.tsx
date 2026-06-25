@@ -11,6 +11,7 @@ import { useUser } from '@/lib/user-context';
 import { canSetCarrierPay } from '@/lib/permissions';
 import { ProfitDonut } from '@/components/profit-donut';
 import { PlacesFieldset } from '@/components/places-fieldset';
+import { WEEKDAY_OPTIONS, countLoadsForWeekdays } from '@/lib/load-weekdays';
 
 export type LoadFormValues = {
   /** Required when creating a load (validated server-side). */
@@ -36,6 +37,8 @@ export type LoadFormValues = {
   loadTypeId?: number;
   origin?: { city?: string; state?: string; zip?: string };
   destination?: { city?: string; state?: string; zip?: string };
+  /** 0=Sun … 6=Sat — create one load per selected day in the 7-day window from pickup date. */
+  postOnWeekdays?: number[];
 };
 
 function normState(s?: string) {
@@ -87,6 +90,7 @@ function mergeInitial(initial?: LoadFormValues): LoadFormValues {
       allowUntilSun: false,
       description: '',
       userNotes: '',
+      postOnWeekdays: [],
       origin: { city: '', state: '', zip: '' },
       destination: { city: '', state: '', zip: '' },
     };
@@ -112,6 +116,7 @@ function mergeInitial(initial?: LoadFormValues): LoadFormValues {
     description:
       typeof initial.description === 'string' ? initial.description : (legacyNotes || ''),
     userNotes: typeof initial.userNotes === 'string' ? initial.userNotes : '',
+    postOnWeekdays: [],
     origin: {
       city: initial.origin?.city || '',
       state: normState(initial.origin?.state),
@@ -136,6 +141,7 @@ export function LoadForm({
   shipperCompanyLoading = false,
   loadTypeOptions = [],
   loadTypeLoading = false,
+  enableMultiDayPost = false,
 }: {
   initial?: LoadFormValues;
   onSubmit: (v: LoadFormValues) => void;
@@ -148,6 +154,8 @@ export function LoadForm({
   shipperCompanyLoading?: boolean;
   loadTypeOptions?: Array<{ id: number; name: string }>;
   loadTypeLoading?: boolean;
+  /** Show Mon–Sun checkboxes to create one load per selected day (create only). */
+  enableMultiDayPost?: boolean;
 }) {
   const session = useUser();
   const staffCanSetCarrierPay = canSetCarrierPay(session?.user as any);
@@ -206,13 +214,17 @@ export function LoadForm({
     const t = templates.find((x) => getId(x) === id);
     if (!t) return;
     // Legacy MVC: one template `Notes` string is written to both Description and UserNotes.
-    const tplText = String((t as { notes?: string }).notes ?? (t as { Notes?: string }).Notes ?? '');
+    const description = String(t.description ?? '').trim();
+    const userNotes = String(t.userNotes ?? '').trim();
+    const legacy = String(t.notes ?? (t as { Notes?: string }).Notes ?? '').trim();
+    const desc = description || userNotes ? description : legacy;
+    const notes = description || userNotes ? userNotes : legacy;
     setForm((p) => ({
       ...p,
       equipmentType: t.equipmentType || p.equipmentType,
       loadTypeId: t.loadTypeId ?? p.loadTypeId,
-      trailerLengthFt: t.trailerLengthFt ?? p.trailerLengthFt,
-      weightLbs: t.weightLbs ?? p.weightLbs,
+      trailerLengthFt: t.assetLength ?? t.trailerLengthFt ?? p.trailerLengthFt,
+      weightLbs: t.weight ?? t.weightLbs ?? p.weightLbs,
       origin: {
         city: t.origin?.city ?? p.origin?.city ?? '',
         state: normState(t.origin?.state ?? p.origin?.state),
@@ -223,10 +235,23 @@ export function LoadForm({
         state: normState(t.destination?.state ?? p.destination?.state),
         zip: t.destination?.zip ?? p.destination?.zip ?? '',
       },
-      description: tplText,
-      userNotes: tplText,
+      description: desc,
+      userNotes: notes,
     }));
   }
+
+  function toggleWeekday(day: number) {
+    setForm((p) => {
+      const cur = p.postOnWeekdays ?? [];
+      const next = cur.includes(day) ? cur.filter((d) => d !== day) : [...cur, day];
+      return { ...p, postOnWeekdays: next };
+    });
+  }
+
+  const multiDayCount = useMemo(
+    () => (enableMultiDayPost ? countLoadsForWeekdays(form.pickUpDate, form.postOnWeekdays) : 1),
+    [enableMultiDayPost, form.pickUpDate, form.postOnWeekdays],
+  );
 
   const profit = useMemo(() => {
     const billed = Number(form.billedToCustomer || 0);
@@ -414,6 +439,42 @@ export function LoadForm({
           </div>
         </div>
 
+        {enableMultiDayPost && (
+          <div className="rounded-md border p-3 space-y-2">
+            <div className="text-sm font-medium">Post on multiple days</div>
+            <p className="text-xs text-muted-foreground">
+              Check each day you want this load created. One duplicate load is created per selected day in the
+              7-day window starting on pickup date (delivery shifts by the same number of days).
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {WEEKDAY_OPTIONS.map((d) => {
+                const checked = (form.postOnWeekdays ?? []).includes(d.value);
+                return (
+                  <label
+                    key={d.value}
+                    className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs cursor-pointer select-none ${
+                      checked ? 'border-primary bg-primary/5 font-medium' : 'border-border'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="h-3.5 w-3.5"
+                      checked={checked}
+                      onChange={() => toggleWeekday(d.value)}
+                    />
+                    {d.label}
+                  </label>
+                );
+              })}
+            </div>
+            {multiDayCount > 1 && (
+              <p className="text-xs font-medium text-primary">
+                Will create {multiDayCount} loads when you save.
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="rounded-md border p-3">
           <div className="text-sm font-medium mb-2">Operational</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
@@ -494,7 +555,11 @@ export function LoadForm({
             </Button>
           )}
           <Button type="submit" disabled={saving}>
-            {saving ? 'Saving…' : submitLabel}
+            {saving
+              ? 'Saving…'
+              : enableMultiDayPost && multiDayCount > 1
+                ? `Create ${multiDayCount} loads`
+                : submitLabel}
           </Button>
         </div>
       </div>

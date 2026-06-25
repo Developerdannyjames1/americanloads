@@ -1,11 +1,29 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Company, LoadTemplate, LoadType } from '../entities';
 import { Roles } from '../common/constants';
 import { SaveTemplateDto } from './dto';
+import { packTemplateNotes, unpackTemplateNotes } from './template-notes';
 
 type Caller = { sub: string; role: string; companyId: number | null };
+
+function resolveTemplateText(dto: SaveTemplateDto): {
+  description: string | null;
+  userNotes: string | null;
+} {
+  let description: string | null = null;
+  let userNotes: string | null = null;
+  if (dto.description !== undefined || dto.userNotes !== undefined) {
+    if (dto.description !== undefined) description = (dto.description || '').trim() || null;
+    if (dto.userNotes !== undefined) userNotes = (dto.userNotes || '').trim() || null;
+  } else if (dto.notes !== undefined) {
+    const n = (dto.notes || '').trim() || null;
+    description = n;
+    userNotes = n;
+  }
+  return { description, userNotes };
+}
 
 @Injectable()
 export class TemplatesService {
@@ -16,6 +34,7 @@ export class TemplatesService {
   ) {}
 
   shape(t: LoadTemplate) {
+    const { description, userNotes } = unpackTemplateNotes(t.Notes);
     return {
       id: t.Id,
       _id: String(t.Id),
@@ -31,7 +50,9 @@ export class TemplatesService {
       destination: t.DestinationCity || t.DestinationState
         ? { city: t.DestinationCity || '', state: t.DestinationState || '', zip: '' }
         : { city: '', state: '', zip: '' },
-      notes: t.Notes || '',
+      description,
+      userNotes,
+      notes: userNotes || description,
     };
   }
 
@@ -91,7 +112,8 @@ export class TemplatesService {
     entity.OriginState = dto.origin?.state || null;
     entity.DestinationCity = dto.destination?.city || null;
     entity.DestinationState = dto.destination?.state || null;
-    entity.Notes = dto.notes || null;
+    const { description, userNotes } = resolveTemplateText(dto);
+    entity.Notes = packTemplateNotes(description, userNotes);
 
     const saved = await this.tmpls.save(entity);
     return this.shape(saved);

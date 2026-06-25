@@ -172,7 +172,9 @@ export default function LoadsPage() {
     setSaving(true);
     setCreateError('');
     try {
-      await Api.createLoad(v);
+      const payload = { ...v };
+      if (!payload.postOnWeekdays?.length) delete payload.postOnWeekdays;
+      await Api.createLoad(payload);
       setOpenCreate(false);
       await reload();
     } catch (err: any) {
@@ -186,7 +188,9 @@ export default function LoadsPage() {
     setSaving(true);
     setEditError('');
     try {
-      await Api.updateLoad(getId(editing), v);
+      const payload = { ...v };
+      delete payload.postOnWeekdays;
+      await Api.updateLoad(getId(editing), payload);
       setEditing(null);
       await reload();
     } catch (err: any) {
@@ -615,6 +619,7 @@ export default function LoadsPage() {
           </DialogHeader>
           {createError && <div className="text-sm text-destructive">{createError}</div>}
           <LoadForm
+            enableMultiDayPost
             requireShipperCompany
             shipperCompanyOptions={shipperCompanyOptions}
             shipperCompanyLoading={shipperCompanyLoading}

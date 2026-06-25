@@ -16,6 +16,7 @@ import {
   type Role,
 } from '../common/constants';
 import { CreateLoadDto, ListLoadsDto, UpdateLoadDto } from './dto';
+import { resolvePickupDatesForWeekdays, shiftDateByPickupOffset } from './load-weekdays';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { MailService } from '../mail/mail.service';
 
@@ -416,6 +417,53 @@ export class LoadsService {
     const destination = dto.destination ? await this.findOrCreatePlace(dto.destination, ODType.Destination) : null;
     if (!destination) throw new BadRequestException('Destination city + state are required');
 
+    const basePickUp = new Date(dto.pickUpDate);
+    const baseDelivery = new Date(dto.deliveryDate);
+    const baseLoadDate = dto.loadDate ? new Date(dto.loadDate) : new Date();
+    const baseUntil = dto.untilDate ? new Date(dto.untilDate) : null;
+
+    const pickupDates = resolvePickupDatesForWeekdays(basePickUp, dto.postOnWeekdays ?? []);
+    if (pickupDates.length === 0) {
+      throw new BadRequestException('No pickup dates match the selected weekdays');
+    }
+
+    const created: Awaited<ReturnType<LoadsService['byIdInternal']>>[] = [];
+    for (const pickUp of pickupDates) {
+      const delivery = shiftDateByPickupOffset(baseDelivery, basePickUp, pickUp)!;
+      const loadDate = shiftDateByPickupOffset(baseLoadDate, basePickUp, pickUp)!;
+      const untilDate = shiftDateByPickupOffset(baseUntil, basePickUp, pickUp);
+
+      const saved = await this.insertLoad(caller, dto, {
+        companyId,
+        lt,
+        originId: origin.Id,
+        destinationId: destination.Id,
+        pickUp,
+        delivery,
+        loadDate,
+        untilDate,
+      });
+      created.push(saved);
+    }
+
+    if (created.length === 1) return created[0];
+    return { loads: created, count: created.length };
+  }
+
+  private async insertLoad(
+    caller: Caller,
+    dto: CreateLoadDto,
+    ctx: {
+      companyId: number;
+      lt: LoadType;
+      originId: number;
+      destinationId: number;
+      pickUp: Date;
+      delivery: Date;
+      loadDate: Date;
+      untilDate: Date | null;
+    },
+  ) {
     let description: string | null = null;
     let userNotes: string | null = null;
     if (dto.description !== undefined || dto.userNotes !== undefined) {
@@ -429,19 +477,19 @@ export class LoadsService {
 
     const load = this.loads.create({
       PostersReferenceId: dto.refId || null,
-      EquipmentType: lt?.Name || dto.equipmentType || 'Dry Van',
-      OriginId: origin.Id,
-      DestinationId: destination?.Id ?? null,
-      LoadTypeId: lt?.Id ?? null,
+      EquipmentType: ctx.lt.Name || dto.equipmentType || 'Dry Van',
+      OriginId: ctx.originId,
+      DestinationId: ctx.destinationId,
+      LoadTypeId: ctx.lt.Id,
       ShipperUserId: caller.sub,
-      CompanyId: companyId,
+      CompanyId: ctx.companyId,
       WorkflowStatus: LoadStatus.Draft,
       CarrierAmount: dto.payToCarrier ?? 0,
       CustomerAmount: dto.billedToCustomer ?? null,
-      PickUpDate: dto.pickUpDate ? new Date(dto.pickUpDate) : null,
-      DeliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : null,
-      DateLoaded: dto.loadDate ? new Date(dto.loadDate) : new Date(),
-      UntilDate: dto.untilDate ? new Date(dto.untilDate) : null,
+      PickUpDate: ctx.pickUp,
+      DeliveryDate: ctx.delivery,
+      DateLoaded: ctx.loadDate,
+      UntilDate: ctx.untilDate,
       AssetLength: dto.trailerLengthFt ?? null,
       Weight: dto.weightLbs ?? null,
       Commodity: dto.commodity || null,
@@ -612,12 +660,26 @@ export class LoadsService {
   async duplicate(caller: Caller, id: number) {
     const src = await this.byIdInternal(id);
     if (!src) throw new NotFoundException();
+    const toIso = (v: Date | string | null | undefined) => {
+      if (v == null) return undefined;
+      const d = v instanceof Date ? v : new Date(v);
+      if (Number.isNaN(d.getTime())) return undefined;
+      return d.toISOString();
+    };
     const dto: CreateLoadDto = {
       shipperCompanyId: (src as any).shipper?.companyId ?? (src as any).shipperCompanyId ?? undefined,
+      refId: src.refId || undefined,
       equipmentType: src.equipmentType,
       trailerLengthFt: src.trailerLengthFt ?? undefined,
       weightLbs: src.weightLbs ?? undefined,
       commodity: src.commodity,
+      pickUpDate: toIso(src.pickUpDate),
+      deliveryDate: toIso(src.deliveryDate),
+      loadDate: toIso(src.loadDate),
+      untilDate: toIso(src.untilDate),
+      isLoadFull: src.isLoadFull,
+      allowUntilSat: src.allowUntilSat,
+      allowUntilSun: src.allowUntilSun,
       billedToCustomer: src.billedToCustomer ?? undefined,
       payToCarrier: src.payToCarrier ?? undefined,
       origin: { city: src.origin.city, state: src.origin.state, zip: src.origin.zip },

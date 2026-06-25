@@ -1,4 +1,4 @@
-import { IsDateString, IsIn, IsInt, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { LoadStatus } from '../common/constants';
 
@@ -37,6 +37,13 @@ export class CreateLoadDto {
 
   @IsOptional() @ValidateNested() @Type(() => PlaceDto) origin?: PlaceDto;
   @IsOptional() @ValidateNested() @Type(() => PlaceDto) destination?: PlaceDto;
+  /** 0=Sun … 6=Sat — create one load per matching day in the 7-day window starting on pickup date. */
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  @Max(6, { each: true })
+  postOnWeekdays?: number[];
 }
 
 export class UpdateLoadDto extends CreateLoadDto {}

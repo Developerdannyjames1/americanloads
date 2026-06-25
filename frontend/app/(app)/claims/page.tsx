@@ -25,26 +25,18 @@ export default function ClaimsPage() {
   const getId = (x: any) => String(x?.id ?? x?._id ?? '');
   const pag = useClientPagination(items, []);
 
-  async function reload() {
-    setLoading(true);
+  async function reload(opts?: { silent?: boolean }) {
+    if (!opts?.silent) setLoading(true);
     try {
       if (canSubmitClaims(session?.user as any, session?.company)) {
         const list = await Api.myClaims();
         setItems(list);
         return;
       }
-      // Admin / shipper: loads visible to the user, then claims per load (Step 4 for admin).
-      const loads = await Api.loadsList({});
-      const allClaims: any[] = [];
-      for (const l of loads) {
-        try {
-          const cs = await Api.claimsForLoad(getId(l));
-          cs.forEach((c: any) => allClaims.push({ ...c, load: l }));
-        } catch {}
-      }
-      setItems(allClaims);
+      const list = await Api.claimsInbox();
+      setItems(list);
     } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(false);
     }
   }
   useEffect(() => {
@@ -59,7 +51,7 @@ export default function ClaimsPage() {
       ev === 'load_assigned' ||
       ev === 'load_updated'
     )
-      reload().catch(() => {});
+      reload({ silent: true }).catch(() => {});
   });
 
   async function accept(id: string) {
@@ -104,7 +96,7 @@ export default function ClaimsPage() {
   async function manualRefresh() {
     setRefreshing(true);
     try {
-      await reload();
+      await reload({ silent: true });
     } finally {
       setRefreshing(false);
     }

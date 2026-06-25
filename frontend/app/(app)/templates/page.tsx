@@ -9,11 +9,26 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@/lib/user-context';
 import { canCreateLoads, isAdmin } from '@/lib/permissions';
-import { Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { TablePagination } from '@/components/table-pagination';
 import { useClientPagination } from '@/lib/use-client-pagination';
 import { confirmDelete } from '@/lib/confirm-action';
 import { PlacesFieldset } from '@/components/places-fieldset';
+
+const EMPTY_FORM = {
+  id: undefined as number | undefined,
+  name: '',
+  isGlobal: false,
+  companyId: '',
+  equipmentType: '',
+  loadTypeId: '',
+  trailerLengthFt: 53,
+  weightLbs: '' as number | '',
+  origin: { city: '', state: '' },
+  destination: { city: '', state: '' },
+  description: '',
+  userNotes: '',
+};
 
 export default function TemplatesPage() {
   const session = useUser();
@@ -25,19 +40,7 @@ export default function TemplatesPage() {
   const [loadTypes, setLoadTypes] = useState<Array<{ id: number; name: string }>>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<any>({
-    name: '',
-    isGlobal: false,
-    companyId: '',
-    equipmentType: '',
-    loadTypeId: '',
-    trailerLengthFt: 53,
-    weightLbs: '',
-    origin: { city: '', state: '' },
-    destination: { city: '', state: '' },
-    description: '',
-    userNotes: '',
-  });
+  const [form, setForm] = useState<any>({ ...EMPTY_FORM });
   const pag = useClientPagination(list, []);
 
   async function reload() {
@@ -71,17 +74,47 @@ export default function TemplatesPage() {
   function update<K extends keyof typeof form>(k: K, v: any) {
     setForm((p: any) => ({ ...p, [k]: v }));
   }
+  function canManageTemplate(t: any) {
+    if (staff) return true;
+    return (
+      session?.user?.role === 'shipper' &&
+      !t.isGlobal &&
+      t.companyId != null &&
+      String(t.companyId) === String(session?.company?.id)
+    );
+  }
+
+  function resetForm() {
+    setForm({ ...EMPTY_FORM });
+    setError('');
+  }
+
+  function startEdit(t: any) {
+    const loadTypeId = t.loadTypeId != null ? String(t.loadTypeId) : '';
+    const lt = loadTypes.find((x) => String(x.id) === loadTypeId);
+    setForm({
+      id: Number(t.id),
+      name: t.name || '',
+      isGlobal: !!t.isGlobal,
+      companyId: t.companyId != null ? String(t.companyId) : '',
+      equipmentType: lt?.name || '',
+      loadTypeId,
+      trailerLengthFt: t.assetLength ?? 53,
+      weightLbs: t.weight ?? '',
+      origin: { city: t.origin?.city || '', state: t.origin?.state || '' },
+      destination: { city: t.destination?.city || '', state: t.destination?.state || '' },
+      description: typeof t.description === 'string' ? t.description : '',
+      userNotes: typeof t.userNotes === 'string' ? t.userNotes : '',
+    });
+    setError('');
+  }
+
   async function save() {
     setError('');
     setSaving(true);
     try {
       const payload: any = { ...form };
-      // Legacy LoadTemplates.Notes = UserNotes || Description (trimmed; user notes wins).
-      const u = typeof form.userNotes === 'string' ? form.userNotes.trim() : '';
-      const d = typeof form.description === 'string' ? form.description.trim() : '';
-      payload.notes = u || d || '';
-      delete payload.description;
-      delete payload.userNotes;
+      delete payload.equipmentType;
       if (form.weightLbs === '') payload.weightLbs = undefined;
       const selectedType = loadTypes.find((lt) => String(lt.id) === String(form.loadTypeId || ''));
       if (!selectedType) throw new Error('Select an equipment type');
@@ -106,21 +139,10 @@ export default function TemplatesPage() {
       delete payload.trailerLengthFt;
       delete payload.weightLbs;
       delete payload.equipmentType;
+      if (form.id) payload.id = Number(form.id);
       await Api.saveTemplate(payload);
       await reload();
-      setForm({
-        name: '',
-        isGlobal: false,
-        companyId: '',
-        equipmentType: '',
-        loadTypeId: '',
-        trailerLengthFt: 53,
-        weightLbs: '',
-        origin: { city: '', state: '' },
-        destination: { city: '', state: '' },
-        description: '',
-        userNotes: '',
-      });
+      resetForm();
     } catch (err: any) {
       setError(err.message || 'Save failed');
     } finally {
@@ -131,6 +153,7 @@ export default function TemplatesPage() {
   async function remove(id: string, name: string) {
     if (!confirmDelete({ subject: 'this template', name })) return;
     await Api.deleteTemplate(id);
+    if (form.id != null && String(form.id) === id) resetForm();
     await reload();
   }
 
@@ -166,7 +189,7 @@ export default function TemplatesPage() {
                     </td>
                     <td>
                       {loadTypes.find((lt) => lt.id === Number(t.loadTypeId))?.name || t.equipmentType}{' '}
-                      {t.trailerLengthFt ? `· ${t.trailerLengthFt}ft` : ''}
+                      {t.assetLength ? `· ${t.assetLength}ft` : ''}
                     </td>
                     <td>
                       {t.origin?.city}, {t.origin?.state}
@@ -175,9 +198,22 @@ export default function TemplatesPage() {
                       {t.destination?.city}, {t.destination?.state}
                     </td>
                     <td className="text-right">
-                      <Button size="sm" variant="ghost" onClick={() => remove(getId(t), t.name || 'Template')}>
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      {canManageTemplate(t) && (
+                        <div className="flex justify-end gap-1">
+                          <Button size="sm" variant="ghost" title="Edit" onClick={() => startEdit(t)}>
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-rose-700 hover:bg-rose-50"
+                            title="Delete"
+                            onClick={() => remove(getId(t), t.name || 'Template')}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -209,7 +245,7 @@ export default function TemplatesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Create template</CardTitle>
+          <CardTitle>{form.id ? 'Edit template' : 'Create template'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
@@ -305,12 +341,19 @@ export default function TemplatesPage() {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Stored as one template note: user notes override description when both are set (same as legacy load board).
+            Description and user notes are saved separately (same as creating a load).
           </p>
           {error && <div className="text-sm text-destructive">{error}</div>}
-          <Button className="w-full" disabled={saving || !form.name} onClick={save}>
-            {saving ? 'Saving…' : 'Save template'}
-          </Button>
+          <div className="flex gap-2">
+            {form.id && (
+              <Button type="button" variant="outline" className="flex-1" disabled={saving} onClick={resetForm}>
+                Cancel
+              </Button>
+            )}
+            <Button className={form.id ? 'flex-1' : 'w-full'} disabled={saving || !form.name} onClick={save}>
+              {saving ? 'Saving…' : form.id ? 'Update template' : 'Save template'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -17,7 +17,7 @@ export class ClaimsController {
   @Get()
   list(@CurrentUser() user: any, @Query('loadId') loadId?: string) {
     if (loadId) return this.svc.listForLoad(user, parseInt(loadId, 10));
-    return this.svc.listAll(user);
+    return this.svc.listInbox(user);
   }
 
   @Get('mine')

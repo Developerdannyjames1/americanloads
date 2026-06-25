@@ -211,6 +211,46 @@ export class ClaimsService {
   async listAll(caller: Caller) {
     if (caller.role !== Roles.Admin) throw new ForbiddenException();
     const rows = await this.claims.find({ order: { CreatedUtc: 'DESC' }, take: 500 });
+    return this.mapClaimsWithRelations(rows);
+  }
+
+  /** Admin: all recent claims. Shipper / shipper dispatcher: claims on their loads — one query. */
+  async listInbox(caller: Caller) {
+    if (caller.role === Roles.Admin) return this.listAll(caller);
+
+    if (caller.role !== Roles.Shipper && caller.role !== Roles.Dispatcher) {
+      throw new ForbiddenException();
+    }
+
+    const loadQb = this.loads.createQueryBuilder('l').select(['l.Id']);
+    if (caller.role === Roles.Shipper) {
+      if (caller.companyId != null) {
+        loadQb.where('l.CompanyId = :cid OR l.ShipperUserId = :uid', {
+          cid: caller.companyId,
+          uid: caller.sub,
+        });
+      } else {
+        loadQb.where('l.ShipperUserId = :uid', { uid: caller.sub });
+      }
+    } else {
+      if (caller.companyId == null) throw new ForbiddenException();
+      loadQb.where('l.CompanyId = :cid', { cid: caller.companyId });
+    }
+
+    const visibleLoads = await loadQb.getMany();
+    const loadIds = visibleLoads.map((l) => l.Id);
+    if (loadIds.length === 0) return [];
+
+    const rows = await this.claims.find({
+      where: { LoadId: In(loadIds) },
+      order: { CreatedUtc: 'DESC' },
+      take: 500,
+    });
+    return this.mapClaimsWithRelations(rows);
+  }
+
+  private async mapClaimsWithRelations(rows: LoadClaim[]) {
+    if (rows.length === 0) return [];
     const loadIds = [...new Set(rows.map((r) => r.LoadId))];
     const carrierIds = [...new Set(rows.map((r) => r.CarrierUserId))];
     const [loads, carriers] = await Promise.all([
@@ -229,7 +269,11 @@ export class ClaimsService {
             }
           : null,
         carrier: cMap.get(r.CarrierUserId)
-          ? { id: r.CarrierUserId, fullName: cMap.get(r.CarrierUserId)!.FullName, email: cMap.get(r.CarrierUserId)!.Email }
+          ? {
+              id: r.CarrierUserId,
+              fullName: cMap.get(r.CarrierUserId)!.FullName,
+              email: cMap.get(r.CarrierUserId)!.Email,
+            }
           : null,
       }),
     );
