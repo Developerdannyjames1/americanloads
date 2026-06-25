@@ -4,8 +4,14 @@ export function confirmPrompt(message: string): boolean {
   return window.confirm(message);
 }
 
-/** Browser confirm for destructive actions — consistent copy across the app. */
+/** Confirm deleting multiple entities. */
+export function confirmBulkDelete(count: number, subject: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const noun = count === 1 ? subject : `${subject}s`;
+  return window.confirm(`Delete ${count} ${noun}?\n\nThis cannot be undone.`);
+}
 
+/** Browser confirm for destructive actions — consistent copy across the app. */
 export function confirmDelete(opts: { subject: string; name?: string }): boolean {
   if (typeof window === 'undefined') return false;
   const detail = opts.name ? `\n\n${opts.name}` : '';

@@ -19,7 +19,7 @@ import {
   canUseCarrierLegWorkflow,
   isAdmin,
 } from '@/lib/permissions';
-import { confirmDelete, confirmDuplicate } from '@/lib/confirm-action';
+import { confirmBulkDelete, confirmDelete, confirmDuplicate } from '@/lib/confirm-action';
 import { Copy, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useSocket } from '@/lib/use-socket';
 import { TablePagination } from '@/components/table-pagination';
@@ -51,6 +51,8 @@ export default function LoadsPage() {
   const [loadTypeLoading, setLoadTypeLoading] = useState(false);
   const [originOptions, setOriginOptions] = useState<Array<{ id: number; city: string; stateCode: string }>>([]);
   const [destinationOptions, setDestinationOptions] = useState<Array<{ id: number; city: string; stateCode: string }>>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   async function reload() {
     const q: Record<string, string> = {};
@@ -232,6 +234,52 @@ export default function LoadsPage() {
     }
   }
 
+  function canDeleteLoad(l: any) {
+    return (
+      isAdmin(session?.user as any) ||
+      (session?.user?.role === 'shipper' && String(l.shipperUserId) === session?.user?.sub)
+    );
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function selectAllDeletableOnPage() {
+    const deletableIds = pag.pageRows.filter(canDeleteLoad).map((l) => getId(l));
+    const allSelected = deletableIds.length > 0 && deletableIds.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allSelected) deletableIds.forEach((id) => next.delete(id));
+      else deletableIds.forEach((id) => next.add(id));
+      return next;
+    });
+  }
+
+  async function bulkRemove() {
+    const ids = [...selectedIds];
+    if (!ids.length) return;
+    if (!confirmBulkDelete(ids.length, 'load')) return;
+    setBulkDeleting(true);
+    try {
+      const results = await Promise.allSettled(ids.map((id) => Api.deleteLoad(id)));
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      const succeeded = ids.length - failed;
+      setSelectedIds(new Set());
+      await reload();
+      if (failed > 0) {
+        alert(`${succeeded} load(s) deleted. ${failed} could not be deleted.`);
+      }
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
   function remove(id: string, label?: string) {
     if (!confirmDelete({ subject: 'this load', name: label })) return;
     Api.deleteLoad(id)
@@ -262,6 +310,12 @@ export default function LoadsPage() {
             editing.status !== 'completed',
         }
       : null;
+
+  const deletableOnPage = pag.pageRows.filter(canDeleteLoad);
+  const allDeletableOnPageSelected =
+    deletableOnPage.length > 0 && deletableOnPage.every((l) => selectedIds.has(getId(l)));
+  const someDeletableOnPageSelected =
+    deletableOnPage.some((l) => selectedIds.has(getId(l))) && !allDeletableOnPageSelected;
 
   return (
     <div className="space-y-4">
@@ -370,7 +424,31 @@ export default function LoadsPage() {
                 )}
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 justify-end">
+            <div className="flex flex-wrap gap-2 justify-end items-center">
+              {selectedIds.size > 0 && (
+                <>
+                  <span className="text-sm text-muted-foreground">{selectedIds.size} selected</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedIds(new Set())}
+                    disabled={bulkDeleting}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    disabled={bulkDeleting}
+                    onClick={bulkRemove}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {bulkDeleting ? 'Deleting…' : 'Delete selected'}
+                  </Button>
+                </>
+              )}
               <Button type="button" variant="outline" onClick={manualRefresh} disabled={refreshing}>
                 <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               </Button>
@@ -392,6 +470,20 @@ export default function LoadsPage() {
             <table className="w-full text-sm">
               <thead className="text-left text-muted-foreground border-b">
                 <tr>
+                  <th className="py-2 w-10">
+                    {deletableOnPage.length > 0 && (
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-slate-300"
+                        checked={allDeletableOnPageSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = someDeletableOnPageSelected;
+                        }}
+                        onChange={selectAllDeletableOnPage}
+                        aria-label="Select all loads on this page"
+                      />
+                    )}
+                  </th>
                   <th className="py-2">Ref</th>
                   <th>Origin</th>
                   <th>Destination</th>
@@ -406,14 +498,23 @@ export default function LoadsPage() {
               </thead>
               <tbody>
                 {pag.pageRows.map((l) => {
-                  const isOwner =
-                    isAdmin(session?.user as any) ||
-                    (session?.user.role === 'shipper' &&
-                      String(l.shipperUserId) === session?.user?.sub);
-                  const refLabel = (l.refId || '').trim() || getId(l).slice(-6);
+                  const isOwner = canDeleteLoad(l);
+                  const rowId = getId(l);
+                  const refLabel = (l.refId || '').trim() || rowId.slice(-6);
                   return (
-                    <tr key={getId(l)} className="border-b last:border-0 align-top">
-                      <td className="py-2 font-medium">{l.refId || getId(l).slice(-6)}</td>
+                    <tr key={rowId} className="border-b last:border-0 align-top">
+                      <td className="py-2">
+                        {isOwner && (
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-slate-300"
+                            checked={selectedIds.has(rowId)}
+                            onChange={() => toggleSelect(rowId)}
+                            aria-label={`Select load ${refLabel}`}
+                          />
+                        )}
+                      </td>
+                      <td className="py-2 font-medium">{l.refId || rowId.slice(-6)}</td>
                       <td>
                         {l.origin?.city}, {l.origin?.state}
                       </td>
@@ -465,7 +566,7 @@ export default function LoadsPage() {
                               variant="ghost"
                               className="text-rose-700 hover:bg-rose-50"
                               title="Delete"
-                              onClick={() => remove(getId(l), refLabel)}
+                              onClick={() => remove(rowId, refLabel)}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
@@ -477,7 +578,7 @@ export default function LoadsPage() {
                 })}
                 {pag.total === 0 && (
                   <tr>
-                    <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                    <td colSpan={11} className="py-8 text-center text-muted-foreground">
                       No loads found.
                     </td>
                   </tr>
