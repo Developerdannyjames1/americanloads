@@ -10,6 +10,7 @@ import { fmtMoney, fmtPercent } from '@/lib/utils';
 import { useUser } from '@/lib/user-context';
 import { canSetCarrierPay } from '@/lib/permissions';
 import { ProfitDonut } from '@/components/profit-donut';
+import { PlacesFieldset } from '@/components/places-fieldset';
 import { unpackTemplateNotes } from '@/lib/template-notes';
 import { WEEKDAY_OPTIONS, countLoadsForWeekdays } from '@/lib/load-weekdays';
 
