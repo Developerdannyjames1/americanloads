@@ -8,8 +8,6 @@ import { packTemplateNotes, unpackTemplateNotes } from './template-notes';
 
 type Caller = { sub: string; role: string; companyId: number | null };
 
-import { unpackTemplateNotes } from './template-notes';
-
 function resolveTemplateText(dto: SaveTemplateDto): {
   description: string | null;
   userNotes: string | null;
