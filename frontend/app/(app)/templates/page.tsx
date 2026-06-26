@@ -14,6 +14,7 @@ import { TablePagination } from '@/components/table-pagination';
 import { useClientPagination } from '@/lib/use-client-pagination';
 import { confirmDelete } from '@/lib/confirm-action';
 import { PlacesFieldset } from '@/components/places-fieldset';
+import { packTemplateNotes, unpackTemplateNotes } from '@/lib/template-notes';
 
 const EMPTY_FORM = {
   id: undefined as number | undefined,
@@ -92,6 +93,16 @@ export default function TemplatesPage() {
   function startEdit(t: any) {
     const loadTypeId = t.loadTypeId != null ? String(t.loadTypeId) : '';
     const lt = loadTypes.find((x) => String(x.id) === loadTypeId);
+    let description = typeof t.description === 'string' ? t.description : '';
+    let userNotes = typeof t.userNotes === 'string' ? t.userNotes : '';
+    if (!description && !userNotes) {
+      const legacy = typeof t.notes === 'string' ? t.notes : '';
+      if (legacy) {
+        const unpacked = unpackTemplateNotes(legacy);
+        description = unpacked.description;
+        userNotes = unpacked.userNotes;
+      }
+    }
     setForm({
       id: Number(t.id),
       name: t.name || '',
@@ -103,8 +114,8 @@ export default function TemplatesPage() {
       weightLbs: t.weight ?? '',
       origin: { city: t.origin?.city || '', state: t.origin?.state || '' },
       destination: { city: t.destination?.city || '', state: t.destination?.state || '' },
-      description: typeof t.description === 'string' ? t.description : '',
-      userNotes: typeof t.userNotes === 'string' ? t.userNotes : '',
+      description,
+      userNotes,
     });
     setError('');
   }
@@ -139,6 +150,12 @@ export default function TemplatesPage() {
       delete payload.trailerLengthFt;
       delete payload.weightLbs;
       delete payload.equipmentType;
+      const description = String(form.description ?? '');
+      const userNotes = String(form.userNotes ?? '');
+      payload.description = description;
+      payload.userNotes = userNotes;
+      // Packed `notes` keeps older API builds working (they only persist Notes).
+      payload.notes = packTemplateNotes(description, userNotes);
       if (form.id) payload.id = Number(form.id);
       await Api.saveTemplate(payload);
       await reload();

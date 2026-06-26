@@ -8,6 +8,8 @@ import { packTemplateNotes, unpackTemplateNotes } from './template-notes';
 
 type Caller = { sub: string; role: string; companyId: number | null };
 
+import { unpackTemplateNotes } from './template-notes';
+
 function resolveTemplateText(dto: SaveTemplateDto): {
   description: string | null;
   userNotes: string | null;
@@ -17,10 +19,15 @@ function resolveTemplateText(dto: SaveTemplateDto): {
   if (dto.description !== undefined || dto.userNotes !== undefined) {
     if (dto.description !== undefined) description = (dto.description || '').trim() || null;
     if (dto.userNotes !== undefined) userNotes = (dto.userNotes || '').trim() || null;
+    if (!description && !userNotes && dto.notes !== undefined) {
+      const unpacked = unpackTemplateNotes(dto.notes);
+      description = unpacked.description || null;
+      userNotes = unpacked.userNotes || null;
+    }
   } else if (dto.notes !== undefined) {
-    const n = (dto.notes || '').trim() || null;
-    description = n;
-    userNotes = n;
+    const unpacked = unpackTemplateNotes(dto.notes);
+    description = unpacked.description || null;
+    userNotes = unpacked.userNotes || null;
   }
   return { description, userNotes };
 }

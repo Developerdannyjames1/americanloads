@@ -10,7 +10,7 @@ import { fmtMoney, fmtPercent } from '@/lib/utils';
 import { useUser } from '@/lib/user-context';
 import { canSetCarrierPay } from '@/lib/permissions';
 import { ProfitDonut } from '@/components/profit-donut';
-import { PlacesFieldset } from '@/components/places-fieldset';
+import { unpackTemplateNotes } from '@/lib/template-notes';
 import { WEEKDAY_OPTIONS, countLoadsForWeekdays } from '@/lib/load-weekdays';
 
 export type LoadFormValues = {
@@ -213,12 +213,16 @@ export function LoadForm({
     if (!id) return;
     const t = templates.find((x) => getId(x) === id);
     if (!t) return;
-    // Legacy MVC: one template `Notes` string is written to both Description and UserNotes.
-    const description = String(t.description ?? '').trim();
-    const userNotes = String(t.userNotes ?? '').trim();
-    const legacy = String(t.notes ?? (t as { Notes?: string }).Notes ?? '').trim();
-    const desc = description || userNotes ? description : legacy;
-    const notes = description || userNotes ? userNotes : legacy;
+    let desc = String(t.description ?? '').trim();
+    let notes = String(t.userNotes ?? '').trim();
+    if (!desc && !notes) {
+      const legacy = String(t.notes ?? (t as { Notes?: string }).Notes ?? '').trim();
+      if (legacy) {
+        const unpacked = unpackTemplateNotes(legacy);
+        desc = unpacked.description;
+        notes = unpacked.userNotes;
+      }
+    }
     setForm((p) => ({
       ...p,
       equipmentType: t.equipmentType || p.equipmentType,
